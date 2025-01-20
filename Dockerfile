@@ -16,6 +16,9 @@ COPY . .
 # Compile o código TypeScript para JavaScript (usando o comando do NestJS)
 RUN npm run build
 
+# Verifique se a pasta dist foi criada corretamente
+RUN ls -l dist
+
 # Exponha a porta que a API irá rodar
 EXPOSE 3000
 
