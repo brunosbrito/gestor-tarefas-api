@@ -12,11 +12,10 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_DB=db
     ports:
-      - 5433:5432
+      - 5433:5432 # A porta externa mapeada
     networks:
       - postgres
 
-  # Serviço do PgAdmin
   pgadmin:
     container_name: pgadmin
     image: dpage/pgadmin4
@@ -32,20 +31,21 @@ services:
     networks:
       - postgres
 
-  # Serviço do backend (NestJS)
   backend:
     container_name: nestjs-backend
     build:
       context: .
-    working_dir: /app # Diretório onde o aplicativo NestJS vai rodar
+    working_dir: /app
+    volumes:
+      - .:/app
     ports:
-      - 3000:3000 # Expondo a porta do backend
+      - 3000:3000
     environment:
-      - DATABASE_HOST=database # Nome do serviço de banco de dados no Docker Compose
-      - DATABASE_PORT=5433
-      - DATABASE_USER=postgres
-      - DATABASE_PASSWORD=Digitalsegurogml2024!
-      - DATABASE_NAME=db
+      - DB_HOST=database # Nome do serviço de banco de dados no Docker Compose
+      - DB_PORT=5432 # Usando a porta interna (não a mapeada)
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=Digitalsegurogml2024!
+      - DB_DATABASE=db
     depends_on:
       - database # Garante que o banco de dados seja iniciado antes do backend
     networks:
