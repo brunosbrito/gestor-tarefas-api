@@ -1,8 +1,18 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { AuthModule } from './modules/auth/auth.module';
+import { UserModule } from './modules/user/user.module';
+import { ProjectModule } from './modules/work/project.module';
+import { ServiceOrderModule } from './modules/service_order/service_order.module';
+import { CollaboratorModule } from './modules/collaborator/collaborator.module';
+import { ActivitiesModule } from './modules/activities/activities.module';
+import { TeamModule } from './modules/team/team.module';
+import { ActivityHistoryModule } from './modules/activity-history/activity-history.module';
+import { MacroTaskModule } from './modules/macro-task/macro-task.module';
+import { ProcessModule } from './modules/processes/process.module';
+import { EffectiveModule } from './modules/effective/effective.module';
+import { ActivityImageModule } from './modules/activity-image/activity-image.module';
 
 @Module({
   imports: [
@@ -15,19 +25,23 @@ import { AppService } from './app.service';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       synchronize: true,
-      entities: [__dirname + '/../**/*.entity.{ts,js}'],
+      entities: ['dist/**/*.entity.js'],
+      migrations: ['src/migrations/*.ts'],
     }),
+    AuthModule,
+    UserModule,
+    ProjectModule,
+    ServiceOrderModule,
+    CollaboratorModule,
+    ActivitiesModule,
+    TeamModule,
+    forwardRef(() => ActivityHistoryModule),
+    forwardRef(() => ActivityImageModule),
+    MacroTaskModule,
+    ProcessModule,
+    EffectiveModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
-export class AppModule {
-  constructor() {
-    console.log('DB_HOST:', process.env.DB_HOST);
-    console.log('DB_PORT:', process.env.DB_PORT);
-    console.log('DB_DATABASE:', process.env.DB_DATABASE);
-    console.log('DB_USERNAME:', process.env.DB_USERNAME);
-    console.log('DB_USERNAME:', process.env.DB_PASSWORD);
-    // Verifique se as variáveis de ambiente estão sendo carregadas corretamente
-  }
-}
+export class AppModule {}
