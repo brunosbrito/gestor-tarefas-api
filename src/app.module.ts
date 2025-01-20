@@ -16,7 +16,10 @@ import { ActivityImageModule } from './modules/activity-image/activity-image.mod
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      envFilePath: '/usr/src/app/.env', // Caminho do arquivo .env no container
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
