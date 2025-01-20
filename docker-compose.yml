@@ -38,8 +38,6 @@ services:
     build:
       context: .
     working_dir: /app # Diretório onde o aplicativo NestJS vai rodar
-    volumes:
-      - .:/app # Mapeia o diretório local para o container
     ports:
       - 3000:3000 # Expondo a porta do backend
     environment:
