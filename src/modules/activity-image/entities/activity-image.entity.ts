@@ -13,8 +13,8 @@ export class ActivityImage {
   @Column()
   imageName: string;
 
-  @Column('bytea') // Usando bytea para armazenar imagens binárias
-  imageData: Buffer;
+  @Column('varchar') // Usando bytea para armazenar imagens binárias
+  imagePath: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

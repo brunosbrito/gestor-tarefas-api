@@ -10,7 +10,7 @@ export class CreateActivityImageDto {
   imageName: string;
 
   @IsNotEmpty()
-  imageData: Buffer;
+  imagePath: string;
 
   @IsString()
   @IsNotEmpty()

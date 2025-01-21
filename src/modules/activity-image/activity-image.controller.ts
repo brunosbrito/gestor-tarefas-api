@@ -7,9 +7,9 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import * as multer from 'multer';
 import { ActivityImageService } from './activity-image.service';
 import { CreateActivityImageDto } from './dto/create-activity-image.dto';
+import { imageFileFilter } from 'src/util/util-file';
 
 @Controller('activity-images')
 export class ActivityImageController {
@@ -18,22 +18,24 @@ export class ActivityImageController {
   @Post('upload/:activityId')
   @UseInterceptors(
     FileInterceptor('image', {
-      storage: multer.memoryStorage(),
-      limits: { fileSize: 5 * 1024 * 1024 }, // Limite de 5MB
+      fileFilter: imageFileFilter, // Validação de tipo de arquivo
     }),
   )
   async uploadImage(
-    @Param('activityId') activityId: number, // Recebe o ID da atividade da URL
+    @Param('activityId') activityId: number,
     @UploadedFile() file: Express.Multer.File,
-    @Body() createActivityImageDto: CreateActivityImageDto, // Recebe a descrição no corpo da requisição
+    @Body() createActivityImageDto: CreateActivityImageDto,
   ) {
+    const filePath = `/files/${file.filename}`;
+    console.log(filePath);
     const newDto: CreateActivityImageDto = {
-      ...createActivityImageDto, // Mantém os dados do DTO enviado no corpo da requisição
+      ...createActivityImageDto,
       activityId: Number(activityId),
-      imageName: file.originalname, // Define o nome do arquivo
-      imageData: file.buffer, // Adiciona os dados do arquivo (em buffer)
+      imageName: file.originalname,
+      imagePath: filePath,
       createdById: Number(createActivityImageDto.createdById),
     };
-    return this.activityImageService.create(newDto);
+
+    return this.activityImageService.create(newDto); // Salva no banco de dados
   }
 }

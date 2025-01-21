@@ -7,6 +7,8 @@ import { HttpService } from '@nestjs/axios';
 import { User } from 'src/modules/user/entities/user.entity';
 import { firstValueFrom } from 'rxjs';
 import { Activity } from '../activities/entities/activities.entity';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class ActivityImageService {
@@ -45,13 +47,13 @@ export class ActivityImageService {
     const savedImage = await this.activityImageRepository.save(newImage);
 
     const message = `Atividade ${createActivityImageDto.activityId} | OS: ${savedImageWithActivity.serviceOrder.serviceOrderNumber}\nDescrição: ${savedImage.description} `;
-    const senderName = createdByUser.username; // Nome do usuário
-    const imageUrl = savedImage.imageData; // Dados da imagem
+    const senderName = createdByUser.username;
+    const imageUrl = savedImage.imagePath;
 
     await this.sendTelegramMessageWithImage(
       message,
       savedImageWithActivity.project.groupNumber,
-      imageUrl,
+      imageUrl, // Passa o caminho da imagem para o envio
       senderName,
     );
 
@@ -61,7 +63,7 @@ export class ActivityImageService {
   private async sendTelegramMessageWithImage(
     message: string,
     chat_id: string,
-    imageBuffer: Buffer,
+    imagePath: string, // Agora, você recebe o caminho da imagem
     senderName: string,
   ) {
     const telegramBotToken = '6355918410:AAHoYDbxazgOA7scKgH5dN-x6nVb_qk84kY';
@@ -69,16 +71,29 @@ export class ActivityImageService {
 
     const formData = new FormData();
     formData.append('chat_id', chat_id);
-    const blob = new Blob([imageBuffer], { type: 'image/jpeg' });
-    formData.append('photo', blob, 'image.jpg'); // Pode ajustar o nome do arquivo conforme necessário
     formData.append('caption', `${message}\nEnviado por: ${senderName}`);
 
+    const imageFilePath = path.join(__dirname, '..', '..', '..', imagePath);
+    console.log('service', imageFilePath);
+
     try {
+      // Verifique se o arquivo existe antes de tentar lê-lo
+      if (!fs.existsSync(imageFilePath)) {
+        console.error('Arquivo não encontrado:', imageFilePath);
+        throw new Error('Arquivo de imagem não encontrado.');
+      }
+
+      const imageBuffer = await fs.promises.readFile(imageFilePath);
+      const imageBlob = new Blob([imageBuffer]);
+
+      formData.append('photo', imageBlob);
+
       const response = await firstValueFrom(
         this.httpService.post(telegramUrl, formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         }),
       );
+
       return response.data;
     } catch (error) {
       console.error('Erro ao enviar imagem para o Telegram:', error);
