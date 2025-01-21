@@ -1,5 +1,4 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
@@ -13,11 +12,18 @@ import { MacroTaskModule } from './modules/macro-task/macro-task.module';
 import { ProcessModule } from './modules/processes/process.module';
 import { EffectiveModule } from './modules/effective/effective.module';
 import { ActivityImageModule } from './modules/activity-image/activity-image.module';
+import { ConfigModule } from '@nestjs/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'files'), // Caminho para a pasta onde as imagens estão localizadas
+      serveRoot: '/files/', // Prefixo para acessar as imagens
+    }),
     ConfigModule.forRoot({
-      envFilePath: '/usr/src/app/.env', // Caminho do arquivo .env no container
+      envFilePath: '/usr/src/app/.env', // Caminho do arquivo .env no container, ajuste conforme necessário
       isGlobal: true,
     }),
     TypeOrmModule.forRoot({
@@ -27,9 +33,10 @@ import { ActivityImageModule } from './modules/activity-image/activity-image.mod
       database: process.env.DB_DATABASE,
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
-      synchronize: true,
-      entities: ['dist/**/*.entity.js'],
-      migrations: ['src/migrations/*.ts'],
+      synchronize: true, // Mantenha como true apenas em desenvolvimento
+      entities: ['dist/**/*.entity.js'], // Confirme se a pasta "dist" é a correta no ambiente de produção
+      migrations: ['src/migrations/*.ts'], // Verifique se você está usando o caminho correto para as migrações em TS
+      logging: true, // Defina como true se precisar de logs SQL
     }),
     AuthModule,
     UserModule,
@@ -44,7 +51,7 @@ import { ActivityImageModule } from './modules/activity-image/activity-image.mod
     ProcessModule,
     EffectiveModule,
   ],
-  controllers: [],
-  providers: [],
+  controllers: [], // Adicione controladores se necessário
+  providers: [], // Adicione provedores se necessário
 })
 export class AppModule {}
