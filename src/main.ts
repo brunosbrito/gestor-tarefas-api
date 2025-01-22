@@ -8,6 +8,7 @@ async function bootstrap() {
     origin: [
       'https://gestor-tarefas.gmxindustrial.com.br',
       'http://localhost:4200',
+      'http://localhost:8080',
     ],
     methods: 'GET,POST,PUT,DELETE,PATCH',
     allowedHeaders: 'Content-Type, Authorization',
