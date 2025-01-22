@@ -15,7 +15,6 @@ import { ActivityImageModule } from './modules/activity-image/activity-image.mod
 import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -52,7 +51,7 @@ import { AppController } from './app.controller';
     ProcessModule,
     EffectiveModule,
   ],
-  controllers: [AppController], // Adicione controladores se necessário
+  controllers: [], // Adicione controladores se necessário
   providers: [], // Adicione provedores se necessário
 })
 export class AppModule {}
