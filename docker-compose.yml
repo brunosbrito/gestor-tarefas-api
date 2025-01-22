@@ -12,7 +12,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_DB=db
     ports:
-      - 5433:5432 # A porta externa mapeada
+      - 5433:5432
     networks:
       - postgres
 
@@ -42,14 +42,16 @@ services:
       - 3000:3000
     environment:
       - DB_HOST=database # Nome do serviço de banco de dados no Docker Compose
-      - DB_PORT=5432 # Usando a porta interna (não a mapeada)
+      - DB_PORT=5432
       - DB_USERNAME=postgres
       - DB_PASSWORD=Digitalsegurogml2024!
       - DB_DATABASE=db
     depends_on:
-      - database # Garante que o banco de dados seja iniciado antes do backend
+      - database
     networks:
       - postgres
+      - apiGestorTarefasNet
+    ipv4_address: 10.5.0.6
 
 volumes:
   pgdata:
@@ -57,3 +59,9 @@ volumes:
 
 networks:
   postgres:
+  apiGestorTarefasNet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+          gateway: 10.5.0.1
