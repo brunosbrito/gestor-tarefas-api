@@ -51,7 +51,7 @@ services:
     networks:
       postgres:
       apiGestorTarefasNet:
-        ipv4_address: 10.5.0.6
+        ipv4_address: 10.6.0.6
 
 volumes:
   pgdata:
@@ -63,5 +63,5 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 10.5.0.0/16
-          gateway: 10.5.0.1
+        - subnet: 10.6.0.0/16
+          gateway: 10.6.0.1
