@@ -5,7 +5,16 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: '*', // Permite todas as origens (não recomendado para produção)
+    origin: (
+      origin: string,
+      callback: (arg0: Error, arg1: boolean) => void,
+    ) => {
+      if (['https://api.gmxindustrial.com.br'].includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'), false);
+      }
+    },
     methods: 'GET,POST,PUT,DELETE,PATCH',
     allowedHeaders: 'Content-Type, Authorization',
   });
