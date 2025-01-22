@@ -9,7 +9,7 @@ async function bootstrap() {
       origin: string,
       callback: (arg0: Error, arg1: boolean) => void,
     ) => {
-      if (['https://api.gmxindustrial.com.br'].includes(origin)) {
+      if (['https://gestor-tarefas.gmxindustrial.com.br'].includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'), false);
