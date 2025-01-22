@@ -33,6 +33,7 @@ services:
 
   backend:
     container_name: nestjs-backend
+    restart: always
     build:
       context: .
     working_dir: /app
