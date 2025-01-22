@@ -49,9 +49,7 @@ services:
     depends_on:
       - database
     networks:
-      postgres:
-      apiGestorTarefasNet:
-        ipv4_address: 10.6.0.6
+      - postgres
 
 volumes:
   pgdata:
@@ -59,9 +57,3 @@ volumes:
 
 networks:
   postgres:
-  apiGestorTarefasNet:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 10.6.0.0/16
-          gateway: 10.6.0.1
