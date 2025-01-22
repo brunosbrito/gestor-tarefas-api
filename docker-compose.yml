@@ -49,9 +49,9 @@ services:
     depends_on:
       - database
     networks:
-      - postgres
-      - apiGestorTarefasNet
-    ipv4_address: 10.5.0.6
+      postgres:
+      apiGestorTarefasNet:
+        ipv4_address: 10.5.0.6
 
 volumes:
   pgdata:
