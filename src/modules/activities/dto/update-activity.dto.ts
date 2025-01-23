@@ -50,10 +50,14 @@ export class UpdateActivityDto extends PartialType(CreateActivityDto) {
 
   @IsArray()
   @IsNotEmpty()
-  users: {
+  workedHours: {
     id: number;
     hours: number;
   }[];
+
+  @IsString()
+  @IsOptional()
+  realizationDescription: Date;
 
   @IsOptional()
   @IsDate()

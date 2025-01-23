@@ -234,7 +234,8 @@ export class ActivitiesService {
     const user = await this.getUser(updateActivityDto.changedBy);
     const status =
       activity.status == 'Paralizadas'
-        ? `Atvidade paralizada: ${updateActivityDto.reason}`
+        ? `Atvidade paralizada: ${updateActivityDto.reason}
+           | Realizado ate o momento:${updateActivityDto.realizationDescription}`
         : activity.status;
     await this.recordActivityHistory(
       updatedActivity,
@@ -351,19 +352,19 @@ export class ActivitiesService {
     const activity = await this.activityRepository.findOne({
       where: { id: activityId },
     });
-
+    console.log(updateActivityDto);
     if (!activity) {
       throw new NotFoundException('Activity not found');
     }
 
-    const collaborators = await this.collaboratorRepository.findByIds(
-      updateActivityDto.users.map((user) => user.id),
-    );
+    const collaborators = await this.collaboratorRepository.find({
+      where: { id: In(updateActivityDto.workedHours.map((user) => user.id)) },
+    });
 
-    if (collaborators.length !== updateActivityDto.users.length) {
+    if (collaborators.length !== updateActivityDto.workedHours.length) {
       throw new NotFoundException('Some collaborators not found');
     }
-    const workedHoursRecords = updateActivityDto.users.map((user) => {
+    const workedHoursRecords = updateActivityDto.workedHours.map((user) => {
       const workedHours = new WorkedHours();
       workedHours.atividade = activity;
       workedHours.colaborador = collaborators.find(
