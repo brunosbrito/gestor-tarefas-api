@@ -114,4 +114,7 @@ export class Activity {
 
   @Column({ type: 'timestamp', nullable: true })
   originalStartDate: Date;
+
+  @Column({ type: 'int', nullable: true })
+  cod_sequencial: number;
 }

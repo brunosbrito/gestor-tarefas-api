@@ -46,20 +46,29 @@ export class ActivitiesService {
       ...activityData
     } = createActivityDto;
 
+    // Obter os colaboradores, projeto e ordem de serviço
     const getCollaborators = await this.getCollaborators(collaborators);
-
     const project = await this.getProject(projectId);
     const orderService = await this.getOrderService(orderServiceId);
     const user = await this.getUser(Number(createdBy));
 
+    // Lógica para calcular ou obter o cod_sequencial baseado no projeto e ordem de serviço
+    const codSequencial = await this.calculateCodSequencial(
+      project,
+      orderService,
+    );
+
+    // Criar a atividade com o cod_sequencial
     const activity = this.activityRepository.create({
       ...activityData,
       project,
       serviceOrder: orderService,
       createdBy: user,
       collaborators: getCollaborators,
+      cod_sequencial: codSequencial, // Adicionar o cod_sequencial
     });
 
+    // Salvar a atividade
     const savedActivity = await this.activityRepository.save(activity);
 
     await this.recordActivityHistory(
@@ -70,11 +79,11 @@ export class ActivitiesService {
     );
 
     const message = `
-🆕 **Nova Atividade Criada Nº ${activity.id}**
+🆕 **Nova Atividade Criada Nº ${activity.cod_sequencial}**
 
 **O.S:** ${orderService.serviceOrderNumber} 
 **Nº Projeto:** ${orderService.projectNumber} 
-**Quantidade:** ${activity.quantity}  
+**Qtd:** ${activity.quantity}  
 **Tarefa Macro:** ${activity.macroTask} 
 **Processo:**  ${activity.process} 
 **Atividade:**  ${activity.description}
@@ -257,11 +266,11 @@ export class ActivitiesService {
 
     if (updatedActivity.status === 'Em execução') {
       message = `
-  ⚡ **Atividade Nº ${updatedActivity.id} Iniciada **
+  ⚡ **Atividade Nº ${activity.cod_sequencial} Iniciada **
   
   **O.S:** ${activity.serviceOrder.serviceOrderNumber}
   **Nº Projeto:** ${activity.serviceOrder.projectNumber}
-  **Quantidade:** ${updatedActivity.quantity}
+  **Qtd:** ${updatedActivity.quantity}
   **Tarefa Macro:** ${updatedActivity.macroTask}
   **Processo:**  ${updatedActivity.process}
   **Atividade:**  ${updatedActivity.description}
@@ -273,11 +282,11 @@ export class ActivitiesService {
       `;
     } else if (updatedActivity.status === 'Paralizadas') {
       message = `
-  ⏸️ **Atividade Pausada Nº ${updatedActivity.id}**
+  ⏸️ **Atividade Pausada Nº ${activity.cod_sequencial}**
   
   **O.S:** ${activity.serviceOrder.serviceOrderNumber}
   **Nº Projeto:** ${activity.serviceOrder.projectNumber}
-  **Quantidade:** ${updatedActivity.quantity}
+  **Qtd:** ${updatedActivity.quantity}
   **Tarefa Macro:** ${updatedActivity.macroTask}
   **Processo:**  ${updatedActivity.process}
   **Atividade:**  ${updatedActivity.description}
@@ -290,11 +299,11 @@ export class ActivitiesService {
       `;
     } else if (updatedActivity.status === 'Concluídas') {
       message = `
-  ✅ **Atividade Concluída Nº ${updatedActivity.id}**
+  ✅ **Atividade Concluída Nº ${activity.cod_sequencial}**
   
   **O.S:** ${activity.serviceOrder.serviceOrderNumber}
   **Nº Projeto:** ${activity.serviceOrder.projectNumber}
-  **Quantidade:** ${updatedActivity.quantity}
+  **Qtd:** ${updatedActivity.quantity}
   **Tarefa Macro:** ${updatedActivity.macroTask}
   **Processo:**  ${updatedActivity.process}
   **Atividade:**  ${updatedActivity.description}
@@ -409,5 +418,33 @@ export class ActivitiesService {
     const [hours, minutes] = time.split('h');
     const minutesDecimal = parseInt(minutes.replace('min', '').trim()) / 60;
     return parseInt(hours.trim()) + minutesDecimal;
+  }
+
+  async calculateCodSequencial(
+    project: Project,
+    orderService: ServiceOrder,
+  ): Promise<number> {
+    // A lógica de como calcular o cod_sequencial vai aqui.
+    // Pode ser baseado em dados do projeto ou da ordem de serviço.
+    // Por exemplo:
+    const lastActivity = await this.activityRepository
+      .createQueryBuilder('activity')
+      .where(
+        'activity.projectId = :projectId AND activity.serviceOrderId = :orderServiceId',
+        {
+          projectId: project.id,
+          orderServiceId: orderService.id,
+        },
+      )
+      .orderBy('activity.cod_sequencial', 'DESC')
+      .getOne();
+
+    // Caso haja atividades anteriores, incrementar o cod_sequencial.
+    if (lastActivity) {
+      return lastActivity.cod_sequencial + 1;
+    } else {
+      // Caso não haja atividades, iniciar com 1.
+      return 1;
+    }
   }
 }

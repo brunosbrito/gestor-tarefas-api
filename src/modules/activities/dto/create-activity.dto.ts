@@ -78,5 +78,9 @@ export class CreateActivityDto {
 
   @IsNumber()
   @IsNotEmpty()
+  cod_sequencial: number;
+
+  @IsNumber()
+  @IsNotEmpty()
   createdBy: User;
 }
