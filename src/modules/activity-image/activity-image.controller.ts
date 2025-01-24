@@ -20,7 +20,7 @@ export class ActivityImageController {
       limits: {
       fileSize: 10 * 1024 * 1024, // Limite de tamanho (10 MB)
     },
-      //fileFilter: imageFileFilter, // Validação de tipo de arquivo
+      fileFilter: imageFileFilter, // Validação de tipo de arquivo
     }),
   )
   async uploadImage(
