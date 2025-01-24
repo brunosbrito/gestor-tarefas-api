@@ -19,7 +19,7 @@ export const imageFileFilter = (
   file: Express.Multer.File,
   callback: any,
 ) => {
-  if (!file?.originalname?.match(/\.(jpg|jpeg|png|gif)$/)) {
+  if (!file?.originalname?.match(/\/(jpg|jpeg|png|gif|heic)$/)) {
     return callback(new Error('Only image files are allowed!'), false);
   }
 
