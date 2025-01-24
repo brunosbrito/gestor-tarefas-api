@@ -9,6 +9,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ActivityImageService } from './activity-image.service';
 import { CreateActivityImageDto } from './dto/create-activity-image.dto';
+import { imageFileFilter } from 'src/util/util-file';
 
 @Controller('activity-images')
 export class ActivityImageController {
