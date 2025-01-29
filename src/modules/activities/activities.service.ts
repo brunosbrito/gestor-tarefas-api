@@ -241,11 +241,18 @@ export class ActivitiesService {
 
     // Registra o histórico da atividade
     const user = await this.getUser(updateActivityDto.changedBy);
-    const status =
-      activity.status == 'Paralizadas'
-        ? `Atvidade paralizada: ${updateActivityDto.reason}
-           | Realizado ate o momento:${updateActivityDto.realizationDescription}`
-        : activity.status;
+    const status = (activity.status = (() => {
+      switch (activity.status) {
+        case 'Paralizadas':
+          return `Atividade paralisada: ${updateActivityDto.reason} | Realizado até o momento: ${updateActivityDto.realizationDescription}`;
+
+        case 'Concluídas':
+          return `Atividade concluída: | ${updateActivityDto.realizationDescription}`;
+
+        default:
+          return activity.status;
+      }
+    })());
     await this.recordActivityHistory(
       updatedActivity,
       'Atualizada',

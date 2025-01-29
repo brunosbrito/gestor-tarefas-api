@@ -19,8 +19,8 @@ export class ActivityImageController {
   @UseInterceptors(
     FileInterceptor('image', {
       limits: {
-      fileSize: 10 * 1024 * 1024, // Limite de tamanho (10 MB)
-    },
+        fileSize: 10 * 1024 * 1024, // Limite de tamanho (10 MB)
+      },
       fileFilter: imageFileFilter, // Validação de tipo de arquivo
     }),
   )
@@ -30,7 +30,7 @@ export class ActivityImageController {
     @Body() createActivityImageDto: CreateActivityImageDto,
   ) {
     const filePath = `/files/${file.filename}`;
-    console.log(filePath);
+
     const newDto: CreateActivityImageDto = {
       ...createActivityImageDto,
       activityId: Number(activityId),
