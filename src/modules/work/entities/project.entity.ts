@@ -38,4 +38,11 @@ export class Project {
 
   @OneToMany(() => Activity, (activity) => activity.project)
   activities: Activity[];
+
+  @Column({
+    type: 'enum',
+    enum: ['Fabrica', 'Obra', 'Mineradora'],
+    default: 'Fabrica',
+  })
+  type: string;
 }

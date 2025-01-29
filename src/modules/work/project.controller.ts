@@ -46,4 +46,9 @@ export class ProjectController {
   async remove(@Param('id') id: number): Promise<void> {
     return this.projectService.remove(id);
   }
+
+  @Get('/type/:type')
+  async findByType(@Param('type') type: string): Promise<Project[]> {
+    return this.projectService.findByType(type);
+  }
 }
