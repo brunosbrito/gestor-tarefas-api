@@ -34,9 +34,6 @@ export class ActivitiesService {
     private readonly httpService: HttpService,
   ) {}
 
-  private readonly telegramBotToken =
-    '6355918410:AAHoYDbxazgOA7scKgH5dN-x6nVb_qk84kY';
-
   async create(createActivityDto: CreateActivityDto): Promise<Activity> {
     const {
       createdBy,
@@ -269,7 +266,7 @@ export class ActivitiesService {
     );
     const percentageWorked = (totalTime / estimatedTimeInDecimal) * 100;
 
-    let message = '';
+    let message = 'teste 123';
 
     if (updatedActivity.status === 'Em execução') {
       message = `
@@ -368,7 +365,7 @@ export class ActivitiesService {
     const activity = await this.activityRepository.findOne({
       where: { id: activityId },
     });
-    console.log(updateActivityDto);
+    console.log(updateActivityDto, 'aa');
     if (!activity) {
       throw new NotFoundException('Activity not found');
     }
@@ -402,7 +399,7 @@ export class ActivitiesService {
   }
 
   private async sendTelegramMessage(message: string, chat_id: string) {
-    const telegramUrl = `https://api.telegram.org/bot${this.telegramBotToken}/sendMessage`;
+    const telegramUrl = `https://api.telegram.org/bot6355918410:AAHoYDbxazgOA7scKgH5dN-x6nVb_qk84kY/sendMessage`;
 
     const payload = {
       chat_id: chat_id,

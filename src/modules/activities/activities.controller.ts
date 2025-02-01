@@ -73,6 +73,7 @@ export class ActivitiesController {
     @Param('id') id: number,
     @Body() updateActivityDto: UpdateActivityDto,
   ) {
+    console.log(updateActivityDto, 'dd');
     return this.activitiesService.update(id, updateActivityDto);
   }
 
