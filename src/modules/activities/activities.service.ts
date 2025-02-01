@@ -279,7 +279,7 @@ export class ActivitiesService {
   **Processo:**  ${updatedActivity.process}
   **Atividade:**  ${updatedActivity.description}
   **Equipe:** ${updatedActivity.collaborators.map((collaborator) => collaborator.name).join(', ')}
-  **Data de inicio:** ${dayjs(updatedActivity.originalStartDate).format('DD/MM/YYYY HH:mm')}
+  **Data de inicio:** ${dayjs(updatedActivity.startDate).format('DD/MM/YYYY HH:mm')}
   **Tempo Previsto:** ${updatedActivity.estimatedTime}
   **Obs:** ${updatedActivity.observation}
   **Iniciado por:** ${user.username}
