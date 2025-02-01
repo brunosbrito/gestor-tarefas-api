@@ -1,4 +1,5 @@
 import { Activity } from 'src/modules/activities/entities/activities.entity';
+import { NonConformity } from 'src/modules/non-conformity/entities/non-conformity.entity';
 import { User } from 'src/modules/user/entities/user.entity';
 import { Project } from 'src/modules/work/entities/project.entity';
 import {
@@ -35,6 +36,9 @@ export class ServiceOrder {
 
   @OneToMany(() => Activity, (activity) => activity.serviceOrder)
   activities: Activity[];
+
+  @OneToMany(() => NonConformity, (nonConformity) => nonConformity.serviceOrder)
+  nonConformities: NonConformity[];
 
   @Column({ type: 'timestamp', nullable: true })
   startDate: Date;

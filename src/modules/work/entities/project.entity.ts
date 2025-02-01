@@ -1,4 +1,5 @@
 import { Activity } from 'src/modules/activities/entities/activities.entity';
+import { NonConformity } from 'src/modules/non-conformity/entities/non-conformity.entity';
 import { ServiceOrder } from 'src/modules/service_order/entities/service_order.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 
@@ -38,6 +39,9 @@ export class Project {
 
   @OneToMany(() => Activity, (activity) => activity.project)
   activities: Activity[];
+
+  @OneToMany(() => NonConformity, (nonConformity) => nonConformity.project)
+  nonConformities: NonConformity[];
 
   @Column({
     type: 'enum',

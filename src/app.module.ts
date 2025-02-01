@@ -16,6 +16,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AppController } from './app.controller';
+import { NonConformityModule } from './modules/non-conformity/non-conformity.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { AppController } from './app.controller';
     MacroTaskModule,
     ProcessModule,
     EffectiveModule,
+    NonConformityModule,
   ],
   controllers: [AppController], // Adicione controladores se necessário
   providers: [], // Adicione provedores se necessário
