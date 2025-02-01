@@ -38,7 +38,6 @@ import { NonConformityModule } from './modules/non-conformity/non-conformity.mod
       synchronize: true, // Mantenha como true apenas em desenvolvimento
       entities: ['dist/**/*.entity.js'], // Confirme se a pasta "dist" é a correta no ambiente de produção
       migrations: ['src/migrations/*.ts'], // Verifique se você está usando o caminho correto para as migrações em TS
-      logging: true, // Defina como true se precisar de logs SQL
     }),
     AuthModule,
     UserModule,
