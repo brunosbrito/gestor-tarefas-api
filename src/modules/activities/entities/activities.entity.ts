@@ -78,8 +78,10 @@ export class Activity {
   })
   serviceOrder: ServiceOrder;
 
-  @ManyToMany(() => Collaborator, (collaborator) => collaborator.activities)
-  @JoinTable()
+  @ManyToMany(() => Collaborator, (collaborator) => collaborator.activities, {
+    cascade: ['insert', 'update'], // Adiciona o cascade de inserção e atualização
+  })
+  @JoinTable({ name: 'activity_collaborator' })
   collaborators: Collaborator[];
 
   @OneToMany(

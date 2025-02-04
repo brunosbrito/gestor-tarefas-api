@@ -22,8 +22,8 @@ export class NonConformity {
   @Column({ type: 'text' })
   description: string;
 
-  @Column({ type: 'varchar', length: 255 })
-  responsibleIdentification: string;
+  @Column({ type: 'int', nullable: true })
+  responsibleIdentification: number;
 
   @Column({ type: 'timestamp' })
   dateOccurrence: Date;
@@ -31,8 +31,8 @@ export class NonConformity {
   @Column({ type: 'text', nullable: true })
   correctiveAction: string;
 
-  @Column({ type: 'text', nullable: true })
-  responsibleAction: string;
+  @Column({ type: 'int', nullable: true })
+  responsibleAction: number;
 
   @Column({ type: 'timestamp', nullable: true })
   dateConclusion: Date;

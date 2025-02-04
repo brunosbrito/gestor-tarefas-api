@@ -24,17 +24,17 @@ import { NonConformityModule } from './modules/non-conformity/non-conformity.mod
       rootPath: join(__dirname, '..', 'files'), // Caminho para a pasta onde as imagens estão localizadas
       serveRoot: '/files/', // Prefixo para acessar as imagens
     }),
-    ConfigModule.forRoot({
-      envFilePath: '/usr/src/app/.env', // Caminho do arquivo .env no container, ajuste conforme necessário
-      isGlobal: true,
-    }),
+    // ConfigModule.forRoot({
+    //   envFilePath: '../.env', // Caminho do arquivo .env no container, ajuste conforme necessário
+    //   isGlobal: true,
+    // }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT),
-      database: process.env.DB_DATABASE,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
+      host: process.env.DB_HOST || 'localhost',
+      port: Number(process.env.DB_PORT) || 5432,
+      database: process.env.DB_DATABASE || 'gestor_tarefas',
+      username: process.env.DB_USERNAME || 'postgres',
+      password: process.env.DB_PASSWORD || 'Digitalsegurogml2024!',
       synchronize: true, // Mantenha como true apenas em desenvolvimento
       entities: ['dist/**/*.entity.js'], // Confirme se a pasta "dist" é a correta no ambiente de produção
       migrations: ['src/migrations/*.ts'], // Verifique se você está usando o caminho correto para as migrações em TS

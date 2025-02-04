@@ -3,23 +3,23 @@ import {
   IsOptional,
   IsDateString,
   IsArray,
-  IsInt,
+  IsNumber,
 } from 'class-validator';
 import { Material } from 'src/modules/material/entities/material.entity';
 import { Workforce } from 'src/modules/workforce-rnc/entities/workforce.entity';
 
 export class CreateNonConformityDto {
-  @IsInt()
-  projectId: string;
+  @IsNumber()
+  projectId: number;
 
-  @IsInt()
-  serviceOrderId: string;
+  @IsNumber()
+  serviceOrderId: number;
 
   @IsString()
   description: string;
 
-  @IsString()
-  responsibleIdentification: string;
+  @IsNumber()
+  responsibleIdentification: number;
 
   @IsDateString()
   dateOccurrence: string;
@@ -28,14 +28,14 @@ export class CreateNonConformityDto {
   correctiveAction: string;
 
   @IsString()
-  responsibleAction: string;
+  responsibleActionId: string;
 
   @IsDateString()
   @IsOptional()
   dataConclusion?: string;
 
-  @IsInt()
-  responsibleRnc: string;
+  @IsNumber()
+  responsibleRncId: number;
 
   @IsArray()
   @IsOptional()

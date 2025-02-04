@@ -13,6 +13,11 @@ import { WorkedHours } from '../worked-hours/entities/worked-hours.entity';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+import * as timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 @Injectable()
 export class ActivitiesService {
@@ -43,29 +48,28 @@ export class ActivitiesService {
       ...activityData
     } = createActivityDto;
 
-    // Obter os colaboradores, projeto e ordem de serviço
-    const getCollaborators = await this.getCollaborators(collaborators);
-    const project = await this.getProject(projectId);
-    const orderService = await this.getOrderService(orderServiceId);
-    const user = await this.getUser(Number(createdBy));
+    const [getCollaborators, project, orderService, user] = await Promise.all([
+      this.getCollaborators(collaborators),
+      this.getProject(projectId),
+      this.getOrderService(orderServiceId),
+      this.getUser(Number(createdBy)),
+    ]);
 
-    // Lógica para calcular ou obter o cod_sequencial baseado no projeto e ordem de serviço
     const codSequencial = await this.calculateCodSequencial(
       project,
       orderService,
     );
 
-    // Criar a atividade com o cod_sequencial
     const activity = this.activityRepository.create({
       ...activityData,
       project,
       serviceOrder: orderService,
       createdBy: user,
       collaborators: getCollaborators,
-      cod_sequencial: codSequencial, // Adicionar o cod_sequencial
+      cod_sequencial: codSequencial,
+      originalStartDate: activityData.startDate,
     });
 
-    // Salvar a atividade
     const savedActivity = await this.activityRepository.save(activity);
 
     await this.recordActivityHistory(
@@ -75,81 +79,18 @@ export class ActivitiesService {
       user,
     );
 
-    const message = `
-🆕 **Nova Atividade Criada Nº ${activity.cod_sequencial}**
-
-**O.S:** ${orderService.serviceOrderNumber} 
-**Nº Projeto:** ${orderService.projectNumber} 
-**Qtd:** ${activity.quantity}  
-**Tarefa Macro:** ${activity.macroTask} 
-**Processo:**  ${activity.process} 
-**Atividade:**  ${activity.description}
-**Equipe:** ${getCollaborators.map((collaborator) => collaborator.name).join(', ')} 
-**Data Criação:** ${dayjs(activity.createdAt).format('DD/MM/YYYY HH:mm')}
-**Tempo Previsto:** ${activity.estimatedTime}
-**Obs:** ${activity.observation}
-**Criado por:** ${user.username}
-    `;
-
+    const message = this.generateTelegramMessage(
+      savedActivity,
+      orderService,
+      getCollaborators,
+      user,
+    );
     this.sendTelegramMessage(message, project.groupNumber);
+
     return savedActivity;
   }
 
-  private async getCollaborators(
-    collaborators: number[],
-  ): Promise<Collaborator[]> {
-    if (!collaborators || collaborators.length === 0) {
-      return [];
-    }
-
-    const getCollaborators = await this.collaboratorRepository.find({
-      where: { id: In(collaborators) },
-    });
-
-    if (getCollaborators.length !== collaborators.length) {
-      throw new NotFoundException('Some collaborators not found');
-    }
-
-    return getCollaborators;
-  }
-
-  private async getProject(projectId: number): Promise<Project> {
-    const project = await this.projectRepository.findOne({
-      where: { id: projectId },
-    });
-
-    if (!project) {
-      throw new NotFoundException('Project not found');
-    }
-
-    return project;
-  }
-
-  private async getOrderService(orderServiceId: number): Promise<ServiceOrder> {
-    const orderService = await this.serviceOrderRepository.findOne({
-      where: { id: orderServiceId },
-    });
-
-    if (!orderService) {
-      throw new NotFoundException('Order service not found');
-    }
-
-    return orderService;
-  }
-
-  private async getUser(createdBy: number): Promise<User> {
-    const user = await this.userRepository.findOne({
-      where: { id: createdBy },
-    });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    return user;
-  }
-
-  findAll(): Promise<Activity[]> {
+  async findAll(): Promise<Activity[]> {
     return this.activityRepository.find({ relations: ['collaborators'] });
   }
 
@@ -172,19 +113,14 @@ export class ActivitiesService {
   ): Promise<Activity> {
     const activity = await this.findOne(id);
 
+    // Atualizar os colaboradores se existirem no DTO
     if (updateActivityDto.collaborators) {
-      const collaborators = await this.collaboratorRepository.find({
-        where: { id: In(updateActivityDto.collaborators) },
-      });
-
-      if (collaborators.length !== updateActivityDto.collaborators.length) {
-        throw new NotFoundException('Some collaborators not found');
-      }
-
-      activity.collaborators = collaborators;
+      activity.collaborators = await this.getCollaborators(
+        updateActivityDto.collaborators,
+      );
     }
 
-    // Verifica se a atividade foi pausada
+    // Atualizar o status da atividade se necessário
     if (updateActivityDto.status === 'Paralizadas') {
       const timePaused = this.calculateTimeDifference(
         activity.startDate,
@@ -197,59 +133,60 @@ export class ActivitiesService {
       updateActivityDto.status === 'Em execução' &&
       activity.status === 'Paralizadas'
     ) {
-      activity.startDate = new Date(); // Atualiza o startDate para o momento da retomada
+      activity.startDate = new Date();
     }
 
     if (
       updateActivityDto.status === 'Em execução' &&
       !activity.originalStartDate
     ) {
-      activity.originalStartDate = activity.startDate; // Registra o momento da primeira execução
+      activity.originalStartDate = activity.startDate;
     }
 
-    // Verifica se o status foi alterado para 'Concluídas'
     if (updateActivityDto.status === 'Concluídas') {
       let finalExecutionTime = 0;
-      await this.saveWorkedHours(activity.id, updateActivityDto);
-      // Se a atividade foi pausada, soma o tempo da última execução
       if (activity.startDate && updateActivityDto.endDate) {
         finalExecutionTime = this.calculateTimeDifference(
           activity.startDate,
           updateActivityDto.endDate,
         );
       }
-
-      // Se não houver pausa, soma diretamente do startDate até endDate
-      if (activity.startDate && !activity.pauseDate) {
-        finalExecutionTime = this.calculateTimeDifference(
-          activity.startDate,
-          updateActivityDto.endDate,
-        );
-      }
-
+      this.saveWorkedHours(activity.id, updateActivityDto);
       activity.totalTime = (activity.totalTime || 0) + finalExecutionTime;
     }
 
-    // Atribui os dados de atualização ao objeto de atividade
-    Object.assign(activity, updateActivityDto);
+    // Atualizar as propriedades manualmente
+    if (updateActivityDto.status) activity.status = updateActivityDto.status;
+    if (updateActivityDto.description)
+      activity.description = updateActivityDto.description;
+    if (updateActivityDto.macroTask)
+      activity.macroTask = updateActivityDto.macroTask;
+    if (updateActivityDto.process) activity.process = updateActivityDto.process;
+    if (updateActivityDto.startDate)
+      activity.startDate = updateActivityDto.startDate;
+    if (updateActivityDto.endDate) activity.endDate = updateActivityDto.endDate;
+    if (updateActivityDto.pauseDate)
+      activity.pauseDate = updateActivityDto.pauseDate;
+    if (updateActivityDto.originalStartDate)
+      activity.originalStartDate = updateActivityDto.originalStartDate;
+    if (updateActivityDto.totalTime)
+      activity.totalTime = updateActivityDto.totalTime;
 
-    // Atualiza a atividade no banco de dados
+    // Atualizar colaboradores, se necessário
+    if (updateActivityDto.collaborators) {
+      activity.collaborators = await this.getCollaborators(
+        updateActivityDto.collaborators,
+      );
+    }
+
     const updatedActivity = await this.activityRepository.save(activity);
 
-    // Registra o histórico da atividade
+    // Registrar o histórico de atualização
     const user = await this.getUser(updateActivityDto.changedBy);
-    const status = (activity.status = (() => {
-      switch (activity.status) {
-        case 'Paralizadas':
-          return `Atividade paralisada: ${updateActivityDto.reason} | Realizado até o momento: ${updateActivityDto.realizationDescription}`;
-
-        case 'Concluídas':
-          return `Atividade concluída: | ${updateActivityDto.realizationDescription}`;
-
-        default:
-          return activity.status;
-      }
-    })());
+    const status = this.generateActivityStatusMessage(
+      activity,
+      updateActivityDto,
+    );
     await this.recordActivityHistory(
       updatedActivity,
       'Atualizada',
@@ -257,70 +194,10 @@ export class ActivitiesService {
       user,
     );
 
-    const totalTime = updatedActivity.totalTime;
-    const hours = Math.floor(totalTime); // Hora inteira
-    const minutes = Math.round((totalTime - hours) * 60); // Minutos
-    const formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-    const estimatedTimeInDecimal = this.convertToDecimalHours(
-      updatedActivity.estimatedTime,
-    );
-    const percentageWorked = (totalTime / estimatedTimeInDecimal) * 100;
-
-    let message = 'teste 123';
-
-    if (updatedActivity.status === 'Em execução') {
-      message = `
-  ⚡ **Atividade Nº ${activity.cod_sequencial} Iniciada **
-  
-  **O.S:** ${activity.serviceOrder.serviceOrderNumber}
-  **Nº Projeto:** ${activity.serviceOrder.projectNumber}
-  **Qtd:** ${updatedActivity.quantity}
-  **Tarefa Macro:** ${updatedActivity.macroTask}
-  **Processo:**  ${updatedActivity.process}
-  **Atividade:**  ${updatedActivity.description}
-  **Equipe:** ${updatedActivity.collaborators.map((collaborator) => collaborator.name).join(', ')}
-  **Data de inicio:** ${dayjs(updatedActivity.startDate).format('DD/MM/YYYY HH:mm')}
-  **Tempo Previsto:** ${updatedActivity.estimatedTime}
-  **Obs:** ${updatedActivity.observation}
-  **Iniciado por:** ${user.username}
-      `;
-    } else if (updatedActivity.status === 'Paralizadas') {
-      message = `
-  ⏸️ **Atividade Pausada Nº ${activity.cod_sequencial}**
-  
-  **O.S:** ${activity.serviceOrder.serviceOrderNumber}
-  **Nº Projeto:** ${activity.serviceOrder.projectNumber}
-  **Qtd:** ${updatedActivity.quantity}
-  **Tarefa Macro:** ${updatedActivity.macroTask}
-  **Processo:**  ${updatedActivity.process}
-  **Atividade:**  ${updatedActivity.description}
-  **Equipe:** ${updatedActivity.collaborators.map((collaborator) => collaborator.name).join(', ')}
-  **Data Pause:** ${dayjs(updatedActivity.pauseDate).format('DD/MM/YYYY HH:mm')}
-  **Tempo Previsto:** ${updatedActivity.estimatedTime}
-  **Tempo Trabalhado:** ${formattedTime} ${Math.round(percentageWorked)}%
-  **Obs:** ${updatedActivity.observation}
-  **Alterado por:** ${user.username}
-      `;
-    } else if (updatedActivity.status === 'Concluídas') {
-      message = `
-  ✅ **Atividade Concluída Nº ${activity.cod_sequencial}**
-  
-  **O.S:** ${activity.serviceOrder.serviceOrderNumber}
-  **Nº Projeto:** ${activity.serviceOrder.projectNumber}
-  **Qtd:** ${updatedActivity.quantity}
-  **Tarefa Macro:** ${updatedActivity.macroTask}
-  **Processo:**  ${updatedActivity.process}
-  **Atividade:**  ${updatedActivity.description}
-  **Equipe:** ${updatedActivity.collaborators.map((collaborator) => collaborator.name).join(', ')}
-  **Data Conclusao:** ${dayjs(updatedActivity.endDate).format('DD/MM/YYYY HH:mm')}
-  **Tempo Previsto:** ${updatedActivity.estimatedTime}
-  **Tempo Trabalhado:** ${formattedTime} ${Math.round(percentageWorked)}%
-  **Obs:** ${updatedActivity.observation}
-  **Alterado por:** ${user.username}
-      `;
-    }
-
+    // Enviar mensagem de atualização via Telegram
+    const message = this.generateTelegramUpdateMessage(updatedActivity, user);
     this.sendTelegramMessage(message, updatedActivity.project.groupNumber);
+
     return updatedActivity;
   }
 
@@ -342,7 +219,45 @@ export class ActivitiesService {
     });
   }
 
-  async recordActivityHistory(
+  private async getCollaborators(
+    collaborators: number[],
+  ): Promise<Collaborator[]> {
+    if (!collaborators || collaborators.length === 0) return [];
+
+    const getCollaborators = await this.collaboratorRepository.find({
+      where: { id: In(collaborators) },
+    });
+
+    if (getCollaborators.length !== collaborators.length) {
+      throw new NotFoundException('Some collaborators not found');
+    }
+
+    return getCollaborators;
+  }
+
+  private async getProject(projectId: number): Promise<Project> {
+    const project = await this.projectRepository.findOne({
+      where: { id: projectId },
+    });
+    if (!project) throw new NotFoundException('Project not found');
+    return project;
+  }
+
+  private async getOrderService(orderServiceId: number): Promise<ServiceOrder> {
+    const orderService = await this.serviceOrderRepository.findOne({
+      where: { id: orderServiceId },
+    });
+    if (!orderService) throw new NotFoundException('Order service not found');
+    return orderService;
+  }
+
+  private async getUser(userId: number): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
+
+  private async recordActivityHistory(
     activity: Activity,
     status: string,
     description: string,
@@ -354,21 +269,17 @@ export class ActivitiesService {
       description,
       changedBy: user,
     });
-
     return this.activityHistoryRepository.save(activityHistory);
   }
 
-  async saveWorkedHours(
+  private async saveWorkedHours(
     activityId: number,
     updateActivityDto: UpdateActivityDto,
   ): Promise<WorkedHours[]> {
     const activity = await this.activityRepository.findOne({
       where: { id: activityId },
     });
-    console.log(updateActivityDto, 'aa');
-    if (!activity) {
-      throw new NotFoundException('Activity not found');
-    }
+    if (!activity) throw new NotFoundException('Activity not found');
 
     const collaborators = await this.collaboratorRepository.find({
       where: { id: In(updateActivityDto.workedHours.map((user) => user.id)) },
@@ -377,6 +288,7 @@ export class ActivitiesService {
     if (collaborators.length !== updateActivityDto.workedHours.length) {
       throw new NotFoundException('Some collaborators not found');
     }
+
     const workedHoursRecords = updateActivityDto.workedHours.map((user) => {
       const workedHours = new WorkedHours();
       workedHours.atividade = activity;
@@ -387,25 +299,19 @@ export class ActivitiesService {
       workedHours.date = new Date().toISOString().split('T')[0];
       return workedHours;
     });
+
     return await this.workedHoursRepository.save(workedHoursRecords);
   }
 
   private calculateTimeDifference(startDate: Date, endDate: Date): number {
     const start = new Date(startDate).getTime();
     const end = new Date(endDate).getTime();
-    const diffInMs = end - start;
-    const diffInHours = diffInMs / (1000 * 60 * 60);
-    return diffInHours;
+    return (end - start) / (1000 * 60 * 60);
   }
 
-  private async sendTelegramMessage(message: string, chat_id: string) {
+  private async sendTelegramMessage(message: string, chatId: string) {
     const telegramUrl = `https://api.telegram.org/bot6355918410:AAHoYDbxazgOA7scKgH5dN-x6nVb_qk84kY/sendMessage`;
-
-    const payload = {
-      chat_id: chat_id,
-      text: message,
-      parse_mode: 'Markdown',
-    };
+    const payload = { chat_id: chatId, text: message, parse_mode: 'Markdown' };
 
     try {
       const response = await firstValueFrom(
@@ -424,13 +330,10 @@ export class ActivitiesService {
     return parseInt(hours.trim()) + minutesDecimal;
   }
 
-  async calculateCodSequencial(
+  private async calculateCodSequencial(
     project: Project,
     orderService: ServiceOrder,
   ): Promise<number> {
-    // A lógica de como calcular o cod_sequencial vai aqui.
-    // Pode ser baseado em dados do projeto ou da ordem de serviço.
-    // Por exemplo:
     const lastActivity = await this.activityRepository
       .createQueryBuilder('activity')
       .where(
@@ -443,12 +346,122 @@ export class ActivitiesService {
       .orderBy('activity.cod_sequencial', 'DESC')
       .getOne();
 
-    // Caso haja atividades anteriores, incrementar o cod_sequencial.
-    if (lastActivity) {
-      return lastActivity.cod_sequencial + 1;
-    } else {
-      // Caso não haja atividades, iniciar com 1.
-      return 1;
+    return lastActivity ? lastActivity.cod_sequencial + 1 : 1;
+  }
+
+  private generateTelegramMessage(
+    activity: Activity,
+    orderService: ServiceOrder,
+    collaborators: Collaborator[],
+    user: User,
+  ): string {
+    return `
+🆕 **Nova Atividade Criada Nº ${activity.cod_sequencial}**
+
+**O.S:** ${orderService.serviceOrderNumber} 
+**Nº Projeto:** ${orderService.projectNumber} 
+**Qtd:** ${activity.quantity}  
+**Tarefa Macro:** ${activity.macroTask} 
+**Processo:**  ${activity.process} 
+**Atividade:**  ${activity.description}
+**Equipe:** ${collaborators.map((collaborator) => collaborator.name).join(', ')} 
+**Data Criação:** ${dayjs(activity.createdAt).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm')}
+**Tempo Previsto:** ${activity.estimatedTime}
+**Obs:** ${activity.observation}
+**Criado por:** ${user.username}
+    `;
+  }
+
+  private generateActivityStatusMessage(
+    activity: Activity,
+    updateActivityDto: UpdateActivityDto,
+  ): string {
+    switch (activity.status) {
+      case 'Paralizadas':
+        return `Atividade paralisada: ${updateActivityDto.reason} | Realizado até o momento: ${updateActivityDto.realizationDescription}`;
+      case 'Concluídas':
+        return `Atividade concluída: | ${updateActivityDto.realizationDescription}`;
+      default:
+        return activity.status;
     }
+  }
+
+  private generateTelegramUpdateMessage(
+    activity: Activity,
+    user: User,
+  ): string {
+    const totalTime = activity.totalTime;
+    const hours = Math.floor(totalTime);
+    const minutes = Math.round((totalTime - hours) * 60);
+    const formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    const estimatedTimeInDecimal = this.convertToDecimalHours(
+      activity.estimatedTime,
+    );
+    const percentageWorked = (totalTime / estimatedTimeInDecimal) * 100;
+
+    if (activity.status === 'Em execução') {
+      return `
+⚡ **Atividade Nº ${activity.cod_sequencial} Iniciada **
+
+**O.S:** ${activity.serviceOrder.serviceOrderNumber}
+**Nº Projeto:** ${activity.serviceOrder.projectNumber}
+**Qtd:** ${activity.quantity}
+**Tarefa Macro:** ${activity.macroTask}
+**Processo:**  ${activity.process}
+**Atividade:**  ${activity.description}
+**Equipe:** ${activity.collaborators.map((collaborator) => collaborator.name).join(', ')}
+**Data de inicio:** ${dayjs(activity.startDate).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm')}
+**Tempo Previsto:** ${activity.estimatedTime}
+**Obs:** ${activity.observation}
+**Iniciado por:** ${user.username}
+      `;
+    } else if (activity.status === 'Paralizadas') {
+      return `
+⏸️ **Atividade Pausada Nº ${activity.cod_sequencial}**
+
+**O.S:** ${activity.serviceOrder.serviceOrderNumber}
+**Nº Projeto:** ${activity.serviceOrder.projectNumber}
+**Qtd:** ${activity.quantity}
+**Tarefa Macro:** ${activity.macroTask}
+**Processo:**  ${activity.process}
+**Atividade:**  ${activity.description}
+**Equipe:** ${activity.collaborators.map((collaborator) => collaborator.name).join(', ')}
+**Data Pause:** ${dayjs(activity.pauseDate).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm')}
+**Tempo Previsto:** ${activity.estimatedTime}
+**Tempo Trabalhado:** ${formattedTime} ${Math.round(percentageWorked)}%
+**Obs:** ${activity.observation}
+**Alterado por:** ${user.username}
+      `;
+    } else if (activity.status === 'Concluídas') {
+      return `
+✅ **Atividade Concluída Nº ${activity.cod_sequencial}**
+
+**O.S:** ${activity.serviceOrder.serviceOrderNumber}
+**Nº Projeto:** ${activity.serviceOrder.projectNumber}
+**Qtd:** ${activity.quantity}
+**Tarefa Macro:** ${activity.macroTask}
+**Processo:**  ${activity.process}
+**Atividade:**  ${activity.description}
+**Equipe:** ${activity.collaborators.map((collaborator) => collaborator.name).join(', ')}
+**Data Conclusao:** ${dayjs(activity.endDate).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm')}
+**Tempo Previsto:** ${activity.estimatedTime}
+**Tempo Trabalhado:** ${formattedTime} ${Math.round(percentageWorked)}%
+**Obs:** ${activity.observation}
+**Alterado por:** ${user.username}
+      `;
+    }
+
+    return `🔄 **Atividade Atualizada Nº ${activity.cod_sequencial}**
+**O.S:** ${activity.serviceOrder.serviceOrderNumber} 
+**Nº Projeto:** ${activity.serviceOrder.projectNumber} 
+**Qtd:** ${activity.quantity}  
+**Tarefa Macro:** ${activity.macroTask} 
+**Processo:**  ${activity.process} 
+**Atividade:**  ${activity.description}
+**Equipe:** ${activity.collaborators.map((collaborator) => collaborator.name).join(', ')} 
+**Data Criação:** ${dayjs(activity.createdAt).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm')}
+**Tempo Previsto:** ${activity.estimatedTime}
+**Obs:** ${activity.observation}
+**Criado por:** ${user.username}`;
   }
 }
