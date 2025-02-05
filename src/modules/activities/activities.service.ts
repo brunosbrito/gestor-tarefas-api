@@ -144,6 +144,7 @@ export class ActivitiesService {
     }
 
     if (updateActivityDto.status === 'Concluídas') {
+      activity.completedQuantity = activity.quantity;
       let finalExecutionTime = 0;
       if (activity.startDate && updateActivityDto.endDate) {
         finalExecutionTime = this.calculateTimeDifference(
@@ -217,6 +218,40 @@ export class ActivitiesService {
         'images',
       ],
     });
+  }
+
+  async updateCompletedQuantity(
+    id: number,
+    completedQuantity: number,
+    changedBy: number,
+  ): Promise<Activity> {
+    const activity = await this.activityRepository.findOne({
+      where: { id },
+      relations: ['serviceOrder', 'collaborators', 'project'],
+    });
+
+    if (!activity) {
+      throw new Error('Atividade não encontrada');
+    }
+
+    activity.completedQuantity = completedQuantity;
+    const user = await this.getUser(changedBy);
+    const message = `🔄 **Atividade Atualizada Nº ${activity.cod_sequencial}**
+**O.S:** ${activity.serviceOrder.serviceOrderNumber} 
+**Nº Projeto:** ${activity.serviceOrder.projectNumber} 
+**Qtd:** ${activity.quantity}
+**Progresso:** ${this.calculateProgress(activity)}%  ${activity.completedQuantity} de ${activity.quantity}
+**Tarefa Macro:** ${activity.macroTask} 
+**Processo:**  ${activity.process} 
+**Atividade:**  ${activity.description}
+**Equipe:** ${activity.collaborators.map((collaborator) => collaborator.name).join(', ')} 
+**Data Criação:** ${dayjs(activity.createdAt).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm')}
+**Tempo Previsto:** ${activity.estimatedTime}
+**Obs:** ${activity.observation}
+**Atualizado por:** ${user.username}`;
+    this.sendTelegramMessage(message, activity.project.groupNumber);
+
+    return await this.activityRepository.save(activity);
   }
 
   private async getCollaborators(
@@ -398,7 +433,6 @@ export class ActivitiesService {
       activity.estimatedTime,
     );
     const percentageWorked = (totalTime / estimatedTimeInDecimal) * 100;
-
     if (activity.status === 'Em execução') {
       return `
 ⚡ **Atividade Nº ${activity.cod_sequencial} Iniciada **
@@ -422,6 +456,7 @@ export class ActivitiesService {
 **O.S:** ${activity.serviceOrder.serviceOrderNumber}
 **Nº Projeto:** ${activity.serviceOrder.projectNumber}
 **Qtd:** ${activity.quantity}
+**Progresso:** ${this.calculateProgress(activity)}%  ${activity.completedQuantity} de ${activity.quantity}
 **Tarefa Macro:** ${activity.macroTask}
 **Processo:**  ${activity.process}
 **Atividade:**  ${activity.description}
@@ -439,6 +474,7 @@ export class ActivitiesService {
 **O.S:** ${activity.serviceOrder.serviceOrderNumber}
 **Nº Projeto:** ${activity.serviceOrder.projectNumber}
 **Qtd:** ${activity.quantity}
+**Progresso:** ${this.calculateProgress(activity)}%  ${activity.completedQuantity} de ${activity.quantity}
 **Tarefa Macro:** ${activity.macroTask}
 **Processo:**  ${activity.process}
 **Atividade:**  ${activity.description}
@@ -454,7 +490,8 @@ export class ActivitiesService {
     return `🔄 **Atividade Atualizada Nº ${activity.cod_sequencial}**
 **O.S:** ${activity.serviceOrder.serviceOrderNumber} 
 **Nº Projeto:** ${activity.serviceOrder.projectNumber} 
-**Qtd:** ${activity.quantity}  
+**Qtd:** ${activity.quantity}
+**Progresso:** ${this.calculateProgress(activity)}%  ${activity.completedQuantity} de ${activity.quantity}
 **Tarefa Macro:** ${activity.macroTask} 
 **Processo:**  ${activity.process} 
 **Atividade:**  ${activity.description}
@@ -462,6 +499,12 @@ export class ActivitiesService {
 **Data Criação:** ${dayjs(activity.createdAt).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm')}
 **Tempo Previsto:** ${activity.estimatedTime}
 **Obs:** ${activity.observation}
-**Criado por:** ${user.username}`;
+**Atualizado por:** ${user.username}`;
   }
+
+  private calculateProgress = (activity: Activity) => {
+    if (!activity.quantity || !activity.completedQuantity) return 0;
+    const progress = (activity.completedQuantity / activity.quantity) * 100;
+    return Math.min(Math.max(progress, 0), 100);
+  };
 }

@@ -9,6 +9,7 @@ import {
   Put,
   UseInterceptors,
   UploadedFiles,
+  Patch,
 } from '@nestjs/common';
 import { ActivitiesService } from './activities.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
@@ -17,6 +18,7 @@ import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { UPLOAD_PATH } from 'src/util/constants';
 import { editFileName } from 'src/util/util-file';
+import { UpdateCompletedQuantityDto } from './dto/update-completedQuantity.dto';
 
 @Controller('activities')
 export class ActivitiesController {
@@ -86,5 +88,18 @@ export class ActivitiesController {
   @Get('service-order/:id')
   findByServiceOrder(@Param('id') id: number) {
     return this.activitiesService.findByServiceOrder(id);
+  }
+
+  @Patch(':id/completedQuantity')
+  async updateCompletedQuantity(
+    @Param('id') id: number,
+    @Body() updateCompletedQuantityDto: UpdateCompletedQuantityDto,
+  ) {
+    const { completedQuantity, changedBy } = updateCompletedQuantityDto;
+    return this.activitiesService.updateCompletedQuantity(
+      id,
+      completedQuantity,
+      changedBy,
+    );
   }
 }

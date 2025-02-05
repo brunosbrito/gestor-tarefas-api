@@ -119,4 +119,7 @@ export class Activity {
 
   @Column({ type: 'int', nullable: true })
   cod_sequencial: number;
+
+  @Column({ type: 'int', default: 0 })
+  completedQuantity: number;
 }

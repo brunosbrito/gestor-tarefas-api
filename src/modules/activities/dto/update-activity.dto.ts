@@ -9,6 +9,8 @@ import {
   IsNotEmpty,
   IsArray,
   IsDate,
+  IsInt,
+  IsPositive,
 } from 'class-validator';
 
 export class UpdateActivityDto extends PartialType(CreateActivityDto) {
@@ -70,4 +72,8 @@ export class UpdateActivityDto extends PartialType(CreateActivityDto) {
   @IsString()
   @IsOptional()
   reason?: string;
+
+  @IsInt()
+  @IsPositive()
+  completedQuantity: number;
 }
