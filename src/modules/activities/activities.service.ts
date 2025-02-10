@@ -172,6 +172,8 @@ export class ActivitiesService {
       activity.originalStartDate = updateActivityDto.originalStartDate;
     if (updateActivityDto.totalTime)
       activity.totalTime = updateActivityDto.totalTime;
+    if (updateActivityDto.observation)
+      activity.observation = updateActivityDto.observation;
 
     // Atualizar colaboradores, se necessário
     if (updateActivityDto.collaborators) {

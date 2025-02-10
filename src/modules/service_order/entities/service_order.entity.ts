@@ -67,6 +67,6 @@ export class ServiceOrder {
   @Column({ type: 'text', nullable: true })
   weight: string;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'int', default: 0 })
   progress: number;
 }

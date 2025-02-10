@@ -76,4 +76,8 @@ export class UpdateActivityDto extends PartialType(CreateActivityDto) {
   @IsInt()
   @IsPositive()
   completedQuantity: number;
+
+  @IsString()
+  @IsOptional()
+  observation;
 }
