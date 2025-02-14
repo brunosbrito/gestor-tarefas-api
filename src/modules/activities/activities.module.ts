@@ -10,6 +10,7 @@ import { ActivityHistory } from '../activity-history/entities/activity-history.e
 import { User } from '../user/entities/user.entity';
 import { WorkedHours } from '../worked-hours/entities/worked-hours.entity';
 import { HttpModule } from '@nestjs/axios';
+import { ActivityImage } from '../activity-image/entities/activity-image.entity';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { HttpModule } from '@nestjs/axios';
       ActivityHistory,
       User,
       WorkedHours,
+      ActivityImage,
     ]),
     HttpModule,
   ],

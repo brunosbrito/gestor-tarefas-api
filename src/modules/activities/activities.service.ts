@@ -15,6 +15,7 @@ import { HttpService } from '@nestjs/axios';
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 import * as timezone from 'dayjs/plugin/timezone';
+import { ActivityImage } from '../activity-image/entities/activity-image.entity';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -36,6 +37,8 @@ export class ActivitiesService {
     private readonly activityHistoryRepository: Repository<ActivityHistory>,
     @InjectRepository(WorkedHours)
     private readonly workedHoursRepository: Repository<WorkedHours>,
+    @InjectRepository(ActivityImage)
+    private readonly activityImageRepository: Repository<ActivityImage>,
     private readonly httpService: HttpService,
   ) {}
 
@@ -212,6 +215,8 @@ export class ActivitiesService {
     }
 
     await this.activityHistoryRepository.delete({ activity: { id } });
+
+    await this.activityImageRepository.delete({ activity: { id } });
 
     await this.activityRepository.remove(activity);
   }
