@@ -205,7 +205,14 @@ export class ActivitiesService {
   }
 
   async remove(id: number): Promise<void> {
+    // Verifica se a atividade existe
     const activity = await this.findOne(id);
+    if (!activity) {
+      throw new Error('Atividade não encontrada');
+    }
+
+    await this.activityHistoryRepository.delete({ activity: { id } });
+
     await this.activityRepository.remove(activity);
   }
 
@@ -242,7 +249,7 @@ export class ActivitiesService {
 **O.S:** ${activity.serviceOrder.serviceOrderNumber} 
 **Nº Projeto:** ${activity.serviceOrder.projectNumber} 
 **Qtd:** ${activity.quantity}
-**Progresso:** ${this.calculateProgress(activity)}%  ${activity.completedQuantity} de ${activity.quantity}
+**Progresso:** ${Math.round(this.calculateProgress(activity))}% ${activity.completedQuantity} de ${activity.quantity}
 **Tarefa Macro:** ${activity.macroTask} 
 **Processo:**  ${activity.process} 
 **Atividade:**  ${activity.description}
@@ -458,7 +465,7 @@ export class ActivitiesService {
 **O.S:** ${activity.serviceOrder.serviceOrderNumber}
 **Nº Projeto:** ${activity.serviceOrder.projectNumber}
 **Qtd:** ${activity.quantity}
-**Progresso:** ${this.calculateProgress(activity)}%  ${activity.completedQuantity} de ${activity.quantity}
+**Progresso:** ${Math.round(this.calculateProgress(activity))}% ${activity.completedQuantity} de ${activity.quantity}
 **Tarefa Macro:** ${activity.macroTask}
 **Processo:**  ${activity.process}
 **Atividade:**  ${activity.description}
@@ -476,7 +483,7 @@ export class ActivitiesService {
 **O.S:** ${activity.serviceOrder.serviceOrderNumber}
 **Nº Projeto:** ${activity.serviceOrder.projectNumber}
 **Qtd:** ${activity.quantity}
-**Progresso:** ${this.calculateProgress(activity)}%  ${activity.completedQuantity} de ${activity.quantity}
+**Progresso:** ${Math.round(this.calculateProgress(activity))}%  ${activity.completedQuantity} de ${activity.quantity}
 **Tarefa Macro:** ${activity.macroTask}
 **Processo:**  ${activity.process}
 **Atividade:**  ${activity.description}
@@ -493,7 +500,7 @@ export class ActivitiesService {
 **O.S:** ${activity.serviceOrder.serviceOrderNumber} 
 **Nº Projeto:** ${activity.serviceOrder.projectNumber} 
 **Qtd:** ${activity.quantity}
-**Progresso:** ${this.calculateProgress(activity)}%  ${activity.completedQuantity} de ${activity.quantity}
+**Progresso:** ${Math.round(this.calculateProgress(activity))}%  ${activity.completedQuantity} de ${activity.quantity}
 **Tarefa Macro:** ${activity.macroTask} 
 **Processo:**  ${activity.process} 
 **Atividade:**  ${activity.description}
