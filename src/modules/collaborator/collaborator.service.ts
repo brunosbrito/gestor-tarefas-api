@@ -18,11 +18,12 @@ export class CollaboratorService {
   async create(
     createCollaboratorDto: CreateCollaboratorDto,
   ): Promise<Collaborator> {
-    const { name, role } = createCollaboratorDto;
+    const { name, role, pricePerHour } = createCollaboratorDto;
 
     const collaborator = this.collaboratorRepository.create({
       name,
       role,
+      pricePerHour
     });
     return this.collaboratorRepository.save(collaborator);
   }

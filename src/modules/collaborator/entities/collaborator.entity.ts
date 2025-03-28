@@ -23,6 +23,10 @@ export class Collaborator {
   @Column()
   role: string;
 
+  @Column("numeric", { precision: 10, scale: 2, default: 0.00 })
+  pricePerHour: number;
+  
+
   @ManyToOne(() => Team, (team) => team.collaborators, {
     nullable: true,
     onDelete: 'SET NULL',

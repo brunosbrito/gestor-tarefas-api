@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, Min } from 'class-validator';
 
 export class CreateCollaboratorDto {
   @IsString()
@@ -8,4 +8,8 @@ export class CreateCollaboratorDto {
   @IsString()
   @IsNotEmpty()
   role: string;
+
+  @IsNumber({}, { message: "O preço deve ser um número válido." })
+  @Min(0, { message: "O preço não pode ser negativo." })
+  pricePerHour: number;
 }

@@ -177,7 +177,9 @@ export class ActivitiesService {
       activity.totalTime = updateActivityDto.totalTime;
     if (updateActivityDto.observation)
       activity.observation = updateActivityDto.observation;
-
+    if (updateActivityDto.estimatedTime)
+      activity.estimatedTime = updateActivityDto.estimatedTime;
+    
     // Atualizar colaboradores, se necessário
     if (updateActivityDto.collaborators) {
       activity.collaborators = await this.getCollaborators(
