@@ -16,6 +16,8 @@ import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 import * as timezone from 'dayjs/plugin/timezone';
 import { ActivityImage } from '../activity-image/entities/activity-image.entity';
+import { MacroTask } from '../macro-task/entities/macro-task.entity';
+import { Process } from '../processes/entities/process.entity';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -39,6 +41,11 @@ export class ActivitiesService {
     private readonly workedHoursRepository: Repository<WorkedHours>,
     @InjectRepository(ActivityImage)
     private readonly activityImageRepository: Repository<ActivityImage>,
+    @InjectRepository(MacroTask)
+    private readonly macroTaskRepository: Repository<MacroTask>,
+    @InjectRepository(Process)
+    private readonly processRepository: Repository<Process>,
+    
     private readonly httpService: HttpService,
   ) {}
 
@@ -56,7 +63,16 @@ export class ActivitiesService {
       this.getProject(projectId),
       this.getOrderService(orderServiceId),
       this.getUser(Number(createdBy)),
+
     ]);
+
+    const macroTask = createActivityDto.macroTask
+  ? await this.macroTaskRepository.findOne({ where: { id: createActivityDto.macroTask.id } })
+  : null;
+
+    const process = createActivityDto.process
+  ? await this.processRepository.findOne({ where: { id: createActivityDto.process.id } })
+  : null;
 
     const codSequencial = await this.calculateCodSequencial(
       project,
@@ -71,6 +87,8 @@ export class ActivitiesService {
       collaborators: getCollaborators,
       cod_sequencial: codSequencial,
       originalStartDate: activityData.startDate,
+      macroTask: macroTask,
+      process: process
     });
 
     const savedActivity = await this.activityRepository.save(activity);
@@ -94,13 +112,13 @@ export class ActivitiesService {
   }
 
   async findAll(): Promise<Activity[]> {
-    return this.activityRepository.find({ relations: ['collaborators'] });
+    return this.activityRepository.find({ relations: ['collaborators', 'project', 'serviceOrder', 'macroTask', 'process'] });
   }
 
   async findOne(id: number): Promise<Activity> {
     const activity = await this.activityRepository.findOne({
       where: { id },
-      relations: ['collaborators', 'project', 'serviceOrder', 'createdBy'],
+      relations: ['collaborators', 'project', 'serviceOrder', 'createdBy', 'macroTask', 'process'],
     });
 
     if (!activity) {
@@ -163,9 +181,6 @@ export class ActivitiesService {
     if (updateActivityDto.status) activity.status = updateActivityDto.status;
     if (updateActivityDto.description)
       activity.description = updateActivityDto.description;
-    if (updateActivityDto.macroTask)
-      activity.macroTask = updateActivityDto.macroTask;
-    if (updateActivityDto.process) activity.process = updateActivityDto.process;
     if (updateActivityDto.startDate)
       activity.startDate = updateActivityDto.startDate;
     if (updateActivityDto.endDate) activity.endDate = updateActivityDto.endDate;
@@ -186,6 +201,11 @@ export class ActivitiesService {
         updateActivityDto.collaborators,
       );
     }
+
+    if (updateActivityDto.macroTask)
+      activity.macroTask = await this.macroTaskRepository.findOne({ where: { id: updateActivityDto.macroTask.id } }) ;
+
+    if (updateActivityDto.process) activity.process = await this.processRepository.findOne({ where: { id: updateActivityDto.process.id }});
 
     const updatedActivity = await this.activityRepository.save(activity);
 
@@ -243,7 +263,7 @@ export class ActivitiesService {
   ): Promise<Activity> {
     const activity = await this.activityRepository.findOne({
       where: { id },
-      relations: ['serviceOrder', 'collaborators', 'project'],
+      relations: ['serviceOrder', 'collaborators', 'project', 'process', 'macroTask'],
     });
 
     if (!activity) {
@@ -257,8 +277,8 @@ export class ActivitiesService {
 **Nº Projeto:** ${activity.serviceOrder.projectNumber} 
 **Qtd:** ${activity.quantity}
 **Progresso:** ${Math.round(this.calculateProgress(activity))}% ${activity.completedQuantity} de ${activity.quantity}
-**Tarefa Macro:** ${activity.macroTask} 
-**Processo:**  ${activity.process} 
+**Tarefa Macro:** ${activity.macroTask.name} 
+**Processo:**  ${activity.process.name} 
 **Atividade:**  ${activity.description}
 **Equipe:** ${activity.collaborators.map((collaborator) => collaborator.name).join(', ')} 
 **Data Criação:** ${dayjs(activity.createdAt).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm')}
@@ -412,8 +432,8 @@ export class ActivitiesService {
 **O.S:** ${orderService.serviceOrderNumber} 
 **Nº Projeto:** ${orderService.projectNumber} 
 **Qtd:** ${activity.quantity}  
-**Tarefa Macro:** ${activity.macroTask} 
-**Processo:**  ${activity.process} 
+**Tarefa Macro:** ${activity.macroTask.name} 
+**Processo:**  ${activity.process.name} 
 **Atividade:**  ${activity.description}
 **Equipe:** ${collaborators.map((collaborator) => collaborator.name).join(', ')} 
 **Data Criação:** ${dayjs(activity.createdAt).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm')}
@@ -456,8 +476,8 @@ export class ActivitiesService {
 **O.S:** ${activity.serviceOrder.serviceOrderNumber}
 **Nº Projeto:** ${activity.serviceOrder.projectNumber}
 **Qtd:** ${activity.quantity}
-**Tarefa Macro:** ${activity.macroTask}
-**Processo:**  ${activity.process}
+**Tarefa Macro:** ${activity.macroTask.name} 
+**Processo:**  ${activity.process.name} 
 **Atividade:**  ${activity.description}
 **Equipe:** ${activity.collaborators.map((collaborator) => collaborator.name).join(', ')}
 **Data de inicio:** ${dayjs(activity.startDate).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm')}
@@ -472,8 +492,8 @@ export class ActivitiesService {
 **O.S:** ${activity.serviceOrder.serviceOrderNumber}
 **Nº Projeto:** ${activity.serviceOrder.projectNumber}
 **Qtd:** ${activity.quantity}
-**Progresso:** ${Math.round(this.calculateProgress(activity))}% ${activity.completedQuantity} de ${activity.quantity}
-**Tarefa Macro:** ${activity.macroTask}
+**Tarefa Macro:** ${activity.macroTask.name} 
+**Processo:**  ${activity.process.name} 
 **Processo:**  ${activity.process}
 **Atividade:**  ${activity.description}
 **Equipe:** ${activity.collaborators.map((collaborator) => collaborator.name).join(', ')}
@@ -490,8 +510,8 @@ export class ActivitiesService {
 **O.S:** ${activity.serviceOrder.serviceOrderNumber}
 **Nº Projeto:** ${activity.serviceOrder.projectNumber}
 **Qtd:** ${activity.quantity}
-**Progresso:** ${Math.round(this.calculateProgress(activity))}%  ${activity.completedQuantity} de ${activity.quantity}
-**Tarefa Macro:** ${activity.macroTask}
+**Tarefa Macro:** ${activity.macroTask.name} 
+**Processo:**  ${activity.process.name}
 **Processo:**  ${activity.process}
 **Atividade:**  ${activity.description}
 **Equipe:** ${activity.collaborators.map((collaborator) => collaborator.name).join(', ')}
@@ -507,8 +527,9 @@ export class ActivitiesService {
 **O.S:** ${activity.serviceOrder.serviceOrderNumber} 
 **Nº Projeto:** ${activity.serviceOrder.projectNumber} 
 **Qtd:** ${activity.quantity}
-**Progresso:** ${Math.round(this.calculateProgress(activity))}%  ${activity.completedQuantity} de ${activity.quantity}
-**Tarefa Macro:** ${activity.macroTask} 
+**Peso:** ${activity.quantity}
+**Tarefa Macro:** ${activity.macroTask.name} 
+**Processo:**  ${activity.process.name} 
 **Processo:**  ${activity.process} 
 **Atividade:**  ${activity.description}
 **Equipe:** ${activity.collaborators.map((collaborator) => collaborator.name).join(', ')} 

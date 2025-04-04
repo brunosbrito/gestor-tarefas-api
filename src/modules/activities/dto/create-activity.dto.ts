@@ -9,6 +9,8 @@ import {
   IsNotEmpty,
   IsDateString,
 } from 'class-validator';
+import { MacroTask } from 'src/modules/macro-task/entities/macro-task.entity';
+import { Process } from 'src/modules/processes/entities/process.entity';
 import { User } from 'src/modules/user/entities/user.entity';
 
 export class CreateActivityDto {
@@ -23,14 +25,6 @@ export class CreateActivityDto {
   @IsString()
   @IsOptional()
   observation?: string;
-
-  @IsString()
-  @IsOptional()
-  macroTask?: string;
-
-  @IsString()
-  @IsOptional()
-  process?: string;
 
   @IsNumber()
   @IsOptional()
@@ -83,4 +77,12 @@ export class CreateActivityDto {
   @IsNumber()
   @IsNotEmpty()
   createdBy: User;
+
+  @IsNumber()
+  @IsNotEmpty()
+  macroTask: MacroTask;
+
+  @IsNumber()
+  @IsNotEmpty()
+  process: Process;
 }

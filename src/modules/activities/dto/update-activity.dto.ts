@@ -12,6 +12,8 @@ import {
   IsInt,
   IsPositive,
 } from 'class-validator';
+import { Process } from 'src/modules/processes/entities/process.entity';
+import { MacroTask } from 'src/modules/macro-task/entities/macro-task.entity';
 
 export class UpdateActivityDto extends PartialType(CreateActivityDto) {
   @IsEnum(['Planejadas', 'Em execução', 'Concluídas', 'Paralizadas'])
@@ -21,14 +23,6 @@ export class UpdateActivityDto extends PartialType(CreateActivityDto) {
   @IsString()
   @IsOptional()
   description?: string;
-
-  @IsString()
-  @IsOptional()
-  macroTask?: string;
-
-  @IsString()
-  @IsOptional()
-  process?: string;
 
   @IsDateString()
   @IsOptional()
@@ -80,4 +74,12 @@ export class UpdateActivityDto extends PartialType(CreateActivityDto) {
   @IsString()
   @IsOptional()
   observation;
+
+  @IsNumber()
+  @IsNotEmpty()
+  macroTask: MacroTask;
+
+  @IsNumber()
+  @IsNotEmpty()
+  process: Process;
 }

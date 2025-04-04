@@ -1,6 +1,8 @@
 import { ActivityHistory } from 'src/modules/activity-history/entities/activity-history.entity';
 import { ActivityImage } from 'src/modules/activity-image/entities/activity-image.entity';
 import { Collaborator } from 'src/modules/collaborator/entities/collaborator.entity';
+import { MacroTask } from 'src/modules/macro-task/entities/macro-task.entity';
+import { Process } from 'src/modules/processes/entities/process.entity';
 import { ServiceOrder } from 'src/modules/service_order/entities/service_order.entity';
 import { User } from 'src/modules/user/entities/user.entity';
 import { Project } from 'src/modules/work/entities/project.entity';
@@ -9,6 +11,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
@@ -49,12 +52,6 @@ export class Activity {
 
   @Column({ type: 'text', nullable: true })
   fileDescription: string;
-
-  @Column({ type: 'text', nullable: true })
-  macroTask: string;
-
-  @Column({ type: 'text', nullable: true })
-  process: string;
 
   @Column({ type: 'float', nullable: true })
   timePerUnit: number;
@@ -122,4 +119,12 @@ export class Activity {
 
   @Column({ type: 'int', default: 0 })
   completedQuantity: number;
+
+  @ManyToOne(() => MacroTask, (macroTask) => macroTask.activities, { nullable: true, onDelete: "SET NULL" })
+  @JoinColumn({ name: "macroTask" })
+  macroTask: MacroTask;
+
+  @ManyToOne(() => Process, (process) => process.activities, { nullable: true, onDelete: "SET NULL" })
+  @JoinColumn({ name: "process" })
+  process: Process;
 }

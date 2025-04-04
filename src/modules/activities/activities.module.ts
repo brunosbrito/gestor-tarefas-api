@@ -11,6 +11,8 @@ import { User } from '../user/entities/user.entity';
 import { WorkedHours } from '../worked-hours/entities/worked-hours.entity';
 import { HttpModule } from '@nestjs/axios';
 import { ActivityImage } from '../activity-image/entities/activity-image.entity';
+import { Process } from '../processes/entities/process.entity';
+import { MacroTask } from '../macro-task/entities/macro-task.entity';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { ActivityImage } from '../activity-image/entities/activity-image.entity'
       User,
       WorkedHours,
       ActivityImage,
+      Process,
+      MacroTask
     ]),
     HttpModule,
   ],
