@@ -18,24 +18,20 @@ export class CollaboratorService {
   async create(
     createCollaboratorDto: CreateCollaboratorDto,
   ): Promise<Collaborator> {
-    const { name, role, pricePerHour } = createCollaboratorDto;
 
-    const collaborator = this.collaboratorRepository.create({
-      name,
-      role,
-      pricePerHour
-    });
+
+    const collaborator = this.collaboratorRepository.create(createCollaboratorDto);
     return this.collaboratorRepository.save(collaborator);
   }
 
   async findAll(): Promise<Collaborator[]> {
-    return this.collaboratorRepository.find({ relations: ['team'] });
+    return this.collaboratorRepository.find({ relations: ['team', 'position'] });
   }
 
   async findOne(id: number): Promise<Collaborator> {
     const collaborator = await this.collaboratorRepository.findOne({
       where: { id },
-      relations: ['team'],
+      relations: ['team', 'position'],
     });
 
     if (!collaborator) {

@@ -1,9 +1,11 @@
+import { Collaborator } from 'src/modules/collaborator/entities/collaborator.entity';
 import {
     Entity,
     PrimaryGeneratedColumn,
     Column,
     CreateDateColumn,
     UpdateDateColumn,
+    OneToMany,
   } from 'typeorm';
   
   @Entity('value_per_position')
@@ -22,5 +24,8 @@ import {
   
     @UpdateDateColumn()
     updatedAt: Date;
+
+    @OneToMany(() => Collaborator, (collaborator) => collaborator.position)
+    collaborators: Collaborator[];
   }
   

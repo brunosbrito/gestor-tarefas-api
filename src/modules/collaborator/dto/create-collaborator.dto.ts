@@ -5,11 +5,7 @@ export class CreateCollaboratorDto {
   @IsNotEmpty()
   name: string;
 
-  @IsString()
-  @IsNotEmpty()
-  role: string;
-
-  @IsNumber({}, { message: "O preço deve ser um número válido." })
-  @Min(0, { message: "O preço não pode ser negativo." })
-  pricePerHour: number;
+  @IsNumber()
+  @Min(1)
+  positionId: number;
 }
