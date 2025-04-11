@@ -17,6 +17,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { NonConformityModule } from './modules/non-conformity/non-conformity.module';
+import { ValuePerPositionModule } from './modules/valuePerPosition/value-per-position.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { NonConformityModule } from './modules/non-conformity/non-conformity.mod
     ProcessModule,
     EffectiveModule,
     NonConformityModule,
+    ValuePerPositionModule,
   ],
   controllers: [AppController],
   providers: [],
