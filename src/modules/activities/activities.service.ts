@@ -45,7 +45,7 @@ export class ActivitiesService {
     private readonly macroTaskRepository: Repository<MacroTask>,
     @InjectRepository(Process)
     private readonly processRepository: Repository<Process>,
-    
+
     private readonly httpService: HttpService,
   ) {}
 
@@ -63,16 +63,19 @@ export class ActivitiesService {
       this.getProject(projectId),
       this.getOrderService(orderServiceId),
       this.getUser(Number(createdBy)),
-
     ]);
 
     const macroTask = createActivityDto.macroTask
-  ? await this.macroTaskRepository.findOne({ where: { id: createActivityDto.macroTask.id } })
-  : null;
+      ? await this.macroTaskRepository.findOne({
+          where: { id: createActivityDto.macroTask.id },
+        })
+      : null;
 
     const process = createActivityDto.process
-  ? await this.processRepository.findOne({ where: { id: createActivityDto.process.id } })
-  : null;
+      ? await this.processRepository.findOne({
+          where: { id: createActivityDto.process.id },
+        })
+      : null;
 
     const codSequencial = await this.calculateCodSequencial(
       project,
@@ -88,7 +91,7 @@ export class ActivitiesService {
       cod_sequencial: codSequencial,
       originalStartDate: activityData.startDate,
       macroTask: macroTask,
-      process: process
+      process: process,
     });
 
     const savedActivity = await this.activityRepository.save(activity);
@@ -112,13 +115,28 @@ export class ActivitiesService {
   }
 
   async findAll(): Promise<Activity[]> {
-    return this.activityRepository.find({ relations: ['collaborators', 'project', 'serviceOrder', 'macroTask', 'process'] });
+    return this.activityRepository.find({
+      relations: [
+        'collaborators',
+        'project',
+        'serviceOrder',
+        'macroTask',
+        'process',
+      ],
+    });
   }
 
   async findOne(id: number): Promise<Activity> {
     const activity = await this.activityRepository.findOne({
       where: { id },
-      relations: ['collaborators', 'project', 'serviceOrder', 'createdBy', 'macroTask', 'process'],
+      relations: [
+        'collaborators',
+        'project',
+        'serviceOrder',
+        'createdBy',
+        'macroTask',
+        'process',
+      ],
     });
 
     if (!activity) {
@@ -194,7 +212,7 @@ export class ActivitiesService {
       activity.observation = updateActivityDto.observation;
     if (updateActivityDto.estimatedTime)
       activity.estimatedTime = updateActivityDto.estimatedTime;
-    
+
     // Atualizar colaboradores, se necessário
     if (updateActivityDto.collaborators) {
       activity.collaborators = await this.getCollaborators(
@@ -203,9 +221,14 @@ export class ActivitiesService {
     }
 
     if (updateActivityDto.macroTask)
-      activity.macroTask = await this.macroTaskRepository.findOne({ where: { id: updateActivityDto.macroTask.id } }) ;
+      activity.macroTask = await this.macroTaskRepository.findOne({
+        where: { id: updateActivityDto.macroTask.id },
+      });
 
-    if (updateActivityDto.process) activity.process = await this.processRepository.findOne({ where: { id: updateActivityDto.process.id }});
+    if (updateActivityDto.process)
+      activity.process = await this.processRepository.findOne({
+        where: { id: updateActivityDto.process.id },
+      });
 
     const updatedActivity = await this.activityRepository.save(activity);
 
@@ -252,6 +275,8 @@ export class ActivitiesService {
         'serviceOrder',
         'createdBy',
         'images',
+        'macroTask',
+        'process',
       ],
     });
   }
@@ -263,7 +288,13 @@ export class ActivitiesService {
   ): Promise<Activity> {
     const activity = await this.activityRepository.findOne({
       where: { id },
-      relations: ['serviceOrder', 'collaborators', 'project', 'process', 'macroTask'],
+      relations: [
+        'serviceOrder',
+        'collaborators',
+        'project',
+        'process',
+        'macroTask',
+      ],
     });
 
     if (!activity) {
