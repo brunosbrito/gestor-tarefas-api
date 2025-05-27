@@ -5,11 +5,8 @@ export class UpdateCollaboratorDto {
   @IsOptional()
   name?: string;
 
-  @IsString()
-  @IsOptional()
-  role?: string;
+  @IsNumber()
+  @Min(1)
+  positionId?: number;
 
-  @IsNumber({}, { message: "O preço deve ser um número válido." })
-  @Min(0, { message: "O preço não pode ser negativo." })
-  pricePerHour: number;
 }

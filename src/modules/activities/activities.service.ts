@@ -275,8 +275,6 @@ export class ActivitiesService {
         'serviceOrder',
         'createdBy',
         'images',
-        'macroTask',
-        'process',
       ],
     });
   }
