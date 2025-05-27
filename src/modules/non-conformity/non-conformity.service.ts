@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NonConformity } from './entities/non-conformity.entity';
 import { CreateNonConformityDto } from './dto/create-non-conformity.dto';
+import { UpdateNonConformityDto } from './dto/update-non-conformity.dto';
 
 @Injectable()
 export class NonConformityService {
@@ -27,6 +28,15 @@ export class NonConformityService {
       where: { id },
       relations: ['images', 'workforce', 'materials'],
     });
+  }
+
+  async update(
+    id: string,
+    dto: UpdateNonConformityDto,
+  ): Promise<NonConformity> {
+    const nonConformity = await this.findOne(id);
+    Object.assign(nonConformity, dto);
+    return this.nonConformityRepository.save(nonConformity);
   }
 
   async remove(id: string): Promise<void> {
