@@ -13,23 +13,21 @@ import { diskStorage } from 'multer';
 import { RncImageService } from './rnc-image.service';
 import { v4 as uuidv4 } from 'uuid';
 import { extname } from 'path';
+import { imageFileFilter } from 'src/util/util-file';
 
 @Controller('rnc-images')
 export class RncImageController {
   constructor(private readonly rncImageService: RncImageService) {}
 
   @Post()
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploads/rnc-images',
-        filename: (req, file, callback) => {
-          const uniqueName = `${uuidv4()}${extname(file.originalname)}`;
-          callback(null, uniqueName);
+   @UseInterceptors(
+      FileInterceptor('image', {
+        limits: {
+          fileSize: 10 * 1024 * 1024, // Limite de tamanho (10 MB)
         },
+        fileFilter: imageFileFilter, // Validação de tipo de arquivo
       }),
-    }),
-  )
+    )
   async uploadImage(
     @UploadedFile() file: Express.Multer.File,
     @Body('nonConformityId') nonConformityId: string,
