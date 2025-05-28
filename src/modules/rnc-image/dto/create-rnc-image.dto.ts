@@ -1,12 +1,10 @@
-import { IsString, IsNotEmpty, IsUUID } from 'class-validator';
-import { NonConformity } from 'src/modules/non-conformity/entities/non-conformity.entity';
+import { IsNotEmpty, IsUUID } from 'class-validator';
 
 export class CreateRncImageDto {
   @IsNotEmpty()
-  @IsString()
-  imageUrl: string;
-
-  @IsNotEmpty()
   @IsUUID()
-  nonConformity: NonConformity;
+  nonConformityId: string;
+
+  imageUrl: string;
 }
+

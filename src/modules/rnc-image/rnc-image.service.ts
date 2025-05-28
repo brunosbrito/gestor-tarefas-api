@@ -2,23 +2,32 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RncImage } from './entities/rnc-image.entity';
-import { CreateRncImageDto } from './dto/create-rnc-image.dto';
+import { NonConformity } from '../non-conformity/entities/non-conformity.entity';
 
 @Injectable()
 export class RncImageService {
   constructor(
     @InjectRepository(RncImage)
     private readonly rncImageRepository: Repository<RncImage>,
+
+    @InjectRepository(NonConformity)
+    private readonly nonConformityRepository: Repository<NonConformity>,
   ) {}
 
-  async create(dto: CreateRncImageDto): Promise<RncImage> {
-    const image = this.rncImageRepository.create(dto);
+  async create(file: Express.Multer.File, nonConformityId: string): Promise<RncImage> {
+    const nonConformity = await this.nonConformityRepository.findOneByOrFail({ id: nonConformityId });
+
+    const image = this.rncImageRepository.create({
+      imageUrl: `/uploads/rnc-images/${file.filename}`,
+      nonConformityId: nonConformity,
+    });
+
     return this.rncImageRepository.save(image);
   }
 
   async findByNonConformity(nonConformityId: string): Promise<RncImage[]> {
     return this.rncImageRepository.find({
-      where: { nonConformity: { id: nonConformityId } },
+      where: { nonConformityId: { id: nonConformityId } },
     });
   }
 

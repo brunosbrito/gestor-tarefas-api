@@ -47,7 +47,7 @@ responsibleAction: Collaborator;
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToMany(() => RncImage, (rncImage) => rncImage.nonConformity, {
+  @OneToMany(() => RncImage, (rncImage) => rncImage.nonConformityId, {
     cascade: true,
   })
   images: RncImage[];

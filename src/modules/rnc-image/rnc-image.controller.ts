@@ -1,23 +1,49 @@
-import { Controller, Post, Body, Param, Get, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UploadedFile,
+  UseInterceptors,
+  Get,
+  Param,
+  Delete,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 import { RncImageService } from './rnc-image.service';
-import { CreateRncImageDto } from './dto/create-rnc-image.dto';
+import { v4 as uuidv4 } from 'uuid';
+import { extname } from 'path';
 
 @Controller('rnc-images')
 export class RncImageController {
   constructor(private readonly rncImageService: RncImageService) {}
 
   @Post()
-  create(@Body() dto: CreateRncImageDto) {
-    return this.rncImageService.create(dto);
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/rnc-images',
+        filename: (req, file, callback) => {
+          const uniqueName = `${uuidv4()}${extname(file.originalname)}`;
+          callback(null, uniqueName);
+        },
+      }),
+    }),
+  )
+  async uploadImage(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('nonConformityId') nonConformityId: string,
+  ) {
+    return this.rncImageService.create(file, nonConformityId);
   }
 
   @Get(':nonConformityId')
-  findByNonConformity(@Param('nonConformityId') nonConformityId: string) {
-    return this.rncImageService.findByNonConformity(nonConformityId);
+  async findByNonConformity(@Param('nonConformityId') id: string) {
+    return this.rncImageService.findByNonConformity(id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string) {
     return this.rncImageService.remove(id);
   }
 }

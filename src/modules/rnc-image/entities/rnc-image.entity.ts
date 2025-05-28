@@ -1,25 +1,21 @@
-import { NonConformity } from 'src/modules/non-conformity/entities/non-conformity.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  CreateDateColumn,
+  JoinColumn,
 } from 'typeorm';
+import { NonConformity } from 'src/modules/non-conformity/entities/non-conformity.entity';
 
 @Entity('rnc_images')
 export class RncImage {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => NonConformity, (nonConformity) => nonConformity.images, {
-    onDelete: 'CASCADE',
-  })
-  nonConformity: NonConformity;
-
-  @Column({ type: 'text' })
+  @Column()
   imageUrl: string;
 
-  @CreateDateColumn()
-  createdAt: Date;
+  @ManyToOne(() => NonConformity)
+  @JoinColumn({ name: 'nonConformityId' })
+  nonConformityId: NonConformity;
 }
