@@ -21,7 +21,7 @@ export class RncImageController {
 
   @Post()
    @UseInterceptors(
-      FileInterceptor('image', {
+      FileInterceptor('file', {
         limits: {
           fileSize: 10 * 1024 * 1024, // Limite de tamanho (10 MB)
         },
