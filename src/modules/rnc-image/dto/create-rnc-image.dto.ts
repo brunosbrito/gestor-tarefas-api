@@ -5,6 +5,6 @@ export class CreateRncImageDto {
   @IsUUID()
   nonConformityId: string;
 
-  imageUrl: string;
+  url: string;
 }
 

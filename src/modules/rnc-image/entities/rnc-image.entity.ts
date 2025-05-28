@@ -13,7 +13,7 @@ export class RncImage {
   id: string;
 
   @Column()
-  imageUrl: string;
+  url: string;
 
   @ManyToOne(() => NonConformity)
   @JoinColumn({ name: 'nonConformityId' })

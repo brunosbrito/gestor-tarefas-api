@@ -18,7 +18,7 @@ export class RncImageService {
     const nonConformity = await this.nonConformityRepository.findOneByOrFail({ id: nonConformityId });
 
     const image = this.rncImageRepository.create({
-      imageUrl:  `/files/${file.filename}`,
+      url:  `/files/${file.filename}`,
       nonConformityId: nonConformity,
     });
 
