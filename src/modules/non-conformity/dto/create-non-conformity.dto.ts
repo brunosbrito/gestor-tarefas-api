@@ -13,7 +13,7 @@ export class CreateNonConformityDto {
   projectId: number;
 
   @IsNumber()
-  serviceOrderId: number;
+  serviceOrder: number;
 
   @IsString()
   description: string;
@@ -28,14 +28,14 @@ export class CreateNonConformityDto {
   correctiveAction: string;
 
   @IsString()
-  responsibleActionId: string;
+  responsibleAction: string;
 
   @IsDateString()
   @IsOptional()
   dataConclusion?: string;
 
   @IsNumber()
-  responsibleRncId: number;
+  responsibleRnc: number;
 
   @IsArray()
   @IsOptional()
@@ -44,4 +44,10 @@ export class CreateNonConformityDto {
   @IsArray()
   @IsOptional()
   materials?: Material[];
+
+  @IsNumber()
+  responsibleRNC: number;
+
+  @IsNumber()
+  project: number;
 }

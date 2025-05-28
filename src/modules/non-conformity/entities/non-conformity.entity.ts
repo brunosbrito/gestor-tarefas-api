@@ -1,3 +1,4 @@
+import { Collaborator } from 'src/modules/collaborator/entities/collaborator.entity';
 import { Material } from 'src/modules/material/entities/material.entity';
 import { RncImage } from 'src/modules/rnc-image/entities/rnc-image.entity';
 import { ServiceOrder } from 'src/modules/service_order/entities/service_order.entity';
@@ -12,6 +13,7 @@ import {
   UpdateDateColumn,
   ManyToOne,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 
 @Entity('non_conformities')
@@ -22,8 +24,9 @@ export class NonConformity {
   @Column({ type: 'text' })
   description: string;
 
-  @Column({ type: 'int', nullable: true })
-  responsibleIdentification: number;
+  @ManyToOne(() => Collaborator, { nullable: true, eager: true })
+  @JoinColumn({ name: 'responsibleIdentification' })
+  responsibleIdentification: Collaborator;
 
   @Column({ type: 'timestamp' })
   dateOccurrence: Date;
@@ -31,8 +34,9 @@ export class NonConformity {
   @Column({ type: 'text', nullable: true })
   correctiveAction: string;
 
-  @Column({ type: 'int', nullable: true })
-  responsibleAction: number;
+ @ManyToOne(() => Collaborator, { nullable: true, eager: true })
+@JoinColumn({ name: 'responsibleAction' })
+responsibleAction: Collaborator;
 
   @Column({ type: 'timestamp', nullable: true })
   dateConclusion: Date;
@@ -56,8 +60,9 @@ export class NonConformity {
   @OneToMany(() => Material, (material) => material.nonConformity)
   materials: Material[];
 
-  @ManyToOne(() => User, (user) => user.responsibleRNC)
-  responsibleRNC: User;
+  @ManyToOne(() => Collaborator, { nullable: true, eager: true })
+  @JoinColumn({ name: 'responsibleRNC' })
+  responsibleRNC: Collaborator;
 
   @ManyToOne(() => Project, (project) => project.nonConformities)
   project: Project;
