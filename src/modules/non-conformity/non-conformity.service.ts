@@ -50,7 +50,7 @@ export class NonConformityService {
   async findAll(): Promise<NonConformity[]> {
     return this.nonConformityRepository.find({
       relations: ['images', 'workforce', 'materials', 'responsibleIdentification',
-        'responsibleAction', 'serviceOrder', 'responsibleRNC'],
+        'responsibleAction', 'serviceOrder', 'responsibleRNC', 'project'],
     });
   }
 
@@ -58,7 +58,7 @@ export class NonConformityService {
     return this.nonConformityRepository.findOne({
       where: { id },
       relations: ['images', 'workforce', 'materials', 'responsibleIdentification',
-        'responsibleAction', 'serviceOrder', 'responsibleRNC'],
+        'responsibleAction', 'serviceOrder', 'responsibleRNC', 'project'],
     });
   }
 
