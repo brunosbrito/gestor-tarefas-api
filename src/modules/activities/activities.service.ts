@@ -67,13 +67,13 @@ export class ActivitiesService {
 
     const macroTask = createActivityDto.macroTask
       ? await this.macroTaskRepository.findOne({
-          where: { id: createActivityDto.macroTask.id },
+          where: { id: Number(createActivityDto.macroTask) },
         })
       : null;
 
     const process = createActivityDto.process
       ? await this.processRepository.findOne({
-          where: { id: createActivityDto.process.id },
+          where: { id: Number(createActivityDto.process) },
         })
       : null;
 
@@ -222,12 +222,12 @@ export class ActivitiesService {
 
     if (updateActivityDto.macroTask)
       activity.macroTask = await this.macroTaskRepository.findOne({
-        where: { id: updateActivityDto.macroTask.id },
+        where: { id: Number(updateActivityDto.macroTask) },
       });
 
     if (updateActivityDto.process)
       activity.process = await this.processRepository.findOne({
-        where: { id: updateActivityDto.process.id },
+        where: { id: Number(updateActivityDto.process) },
       });
 
     const updatedActivity = await this.activityRepository.save(activity);
