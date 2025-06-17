@@ -2,7 +2,6 @@ import { Collaborator } from 'src/modules/collaborator/entities/collaborator.ent
 import { Material } from 'src/modules/material/entities/material.entity';
 import { RncImage } from 'src/modules/rnc-image/entities/rnc-image.entity';
 import { ServiceOrder } from 'src/modules/service_order/entities/service_order.entity';
-import { User } from 'src/modules/user/entities/user.entity';
 import { Project } from 'src/modules/work/entities/project.entity';
 import { Workforce } from 'src/modules/workforce-rnc/entities/workforce.entity';
 import {
@@ -34,9 +33,9 @@ export class NonConformity {
   @Column({ type: 'text', nullable: true })
   correctiveAction: string;
 
- @ManyToOne(() => Collaborator, { nullable: true, eager: true })
-@JoinColumn({ name: 'responsibleAction' })
-responsibleAction: Collaborator;
+  @ManyToOne(() => Collaborator, { nullable: true, eager: true })
+  @JoinColumn({ name: 'responsibleAction' })
+  responsibleAction: Collaborator;
 
   @Column({ type: 'timestamp', nullable: true })
   dateConclusion: Date;
@@ -46,6 +45,9 @@ responsibleAction: Collaborator;
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column({ unique: true })
+  code: number;
 
   @OneToMany(() => RncImage, (rncImage) => rncImage.nonConformityId, {
     cascade: true,

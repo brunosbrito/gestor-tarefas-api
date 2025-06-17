@@ -1,16 +1,21 @@
-import { IsUUID, IsString, IsInt, Min } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 
 export class CreateWorkforceDto {
-  @IsUUID()
-  nonConformityId: string;
+  @IsNumber()
+  colaboradorId: number;
 
   @IsString()
-  workerName: string;
+  name: string;
+
+  @IsNumber()
+  hours: number;
+
+  @IsNumber()
+  valueHour: number;
+
+  @IsNumber()
+  total: number;
 
   @IsString()
-  role: string;
-
-  @IsInt()
-  @Min(0)
-  hoursWorked: number;
+  rnc: string; // ID da não conformidade (foreign key)
 }

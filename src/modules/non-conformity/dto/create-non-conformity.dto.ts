@@ -35,6 +35,9 @@ export class CreateNonConformityDto {
   dataConclusion?: string;
 
   @IsNumber()
+  code: number;
+
+  @IsNumber()
   responsibleRnc: number;
 
   @IsArray()

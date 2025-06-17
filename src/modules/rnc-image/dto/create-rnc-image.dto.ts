@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
 
 export class CreateRncImageDto {
   @IsNotEmpty()
@@ -6,5 +6,7 @@ export class CreateRncImageDto {
   nonConformityId: string;
 
   url: string;
-}
 
+  @IsOptional()
+  description: string;
+}

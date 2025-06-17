@@ -1,15 +1,6 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { WorkforceService } from './workforce.service';
 import { CreateWorkforceDto } from './dto/create-workforce.dto';
-import { UpdateWorkforceDto } from './dto/update-workforce.dto';
 
 @Controller('workforce')
 export class WorkforceController {
@@ -25,15 +16,20 @@ export class WorkforceController {
     return this.workforceService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.workforceService.findOne(id);
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.workforceService.findOne(id);
+  // }
+
+  @Get('/rnc/:rncId')
+  findByRnc(@Param('rncId') rncId: string) {
+    return this.workforceService.findByRnc(rncId);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateWorkforceDto) {
-    return this.workforceService.update(id, dto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() dto: UpdateWorkforceDto) {
+  //   return this.workforceService.update(id, dto);
+  // }
 
   @Delete(':id')
   remove(@Param('id') id: string) {

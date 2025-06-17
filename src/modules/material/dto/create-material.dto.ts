@@ -1,17 +1,21 @@
-import { IsUUID, IsString, IsInt, Min, IsOptional } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 
 export class CreateMaterialDto {
-  @IsUUID()
-  nonConformityId: string;
+  @IsString()
+  material: string;
+
+  @IsNumber()
+  quantidade: number;
 
   @IsString()
-  materialName: string;
+  unidade: string;
 
-  @IsInt()
-  @Min(1)
-  quantity: number;
+  @IsNumber()
+  preco: number;
+
+  @IsNumber()
+  total: number;
 
   @IsString()
-  @IsOptional()
-  unit?: string;
+  rncId: string; // ID da não conformidade
 }

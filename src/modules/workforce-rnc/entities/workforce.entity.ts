@@ -17,14 +17,20 @@ export class Workforce {
   })
   nonConformity: NonConformity;
 
-  @Column({ type: 'varchar', length: 255 })
-  workerName: string;
+  @Column({ type: 'int' })
+  colaboradorId: number;
 
   @Column({ type: 'varchar', length: 255 })
-  role: string;
+  name: string;
 
-  @Column({ type: 'int', default: 0 })
-  hoursWorked: number;
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  valueHour: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  total: number;
+
+  @Column({ type: 'decimal', precision: 5, scale: 2 })
+  hours: number;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -4,10 +4,11 @@ import { Material } from './entities/material.entity';
 import { MaterialController } from './material.controller';
 import { MaterialService } from './material.service';
 import { NonConformityModule } from '../non-conformity/non-conformity.module';
+import { NonConformity } from '../non-conformity/entities/non-conformity.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Material]),
+    TypeOrmModule.forFeature([Material, NonConformity]),
     forwardRef(() => NonConformityModule),
   ],
   controllers: [MaterialController],

@@ -1,36 +1,27 @@
 import { NonConformity } from 'src/modules/non-conformity/entities/non-conformity.entity';
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  CreateDateColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('materials')
 export class Material {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: 255 })
-  materialName: string;
+  @Column()
+  material: string;
 
-  @Column({ type: 'int', default: 0 })
-  quantity: number;
+  @Column('decimal')
+  quantidade: number;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  unit: string;
+  @Column()
+  unidade: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-  unitPrice: number;
+  @Column('decimal')
+  preco: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-  totalPrice: number;
+  @Column('decimal')
+  total: number;
 
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @ManyToOne(() => NonConformity, (nonConformity) => nonConformity.materials, {
+  @ManyToOne(() => NonConformity, (rnc) => rnc.materials, {
     onDelete: 'CASCADE',
   })
   nonConformity: NonConformity;

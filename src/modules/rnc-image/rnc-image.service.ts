@@ -14,12 +14,19 @@ export class RncImageService {
     private readonly nonConformityRepository: Repository<NonConformity>,
   ) {}
 
-  async create(file: Express.Multer.File, nonConformityId: string): Promise<RncImage> {
-    const nonConformity = await this.nonConformityRepository.findOneByOrFail({ id: nonConformityId });
+  async create(
+    file: Express.Multer.File,
+    nonConformityId: string,
+    description: string = '', // Default description if not provided
+  ): Promise<RncImage> {
+    const nonConformity = await this.nonConformityRepository.findOneByOrFail({
+      id: nonConformityId,
+    });
 
     const image = this.rncImageRepository.create({
-      url:  `/files/${file.filename}`,
+      url: `/files/${file.filename}`,
       nonConformityId: nonConformity,
+      description: description, // You can modify this to include more details if needed
     });
 
     return this.rncImageRepository.save(image);

@@ -11,7 +11,7 @@ import { MaterialService } from './material.service';
 import { CreateMaterialDto } from './dto/create-material.dto';
 import { UpdateMaterialDto } from './dto/update-material.dto';
 
-@Controller('material')
+@Controller('materials')
 export class MaterialController {
   constructor(private readonly materialService: MaterialService) {}
 
@@ -28,6 +28,11 @@ export class MaterialController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.materialService.findOne(id);
+  }
+
+  @Get('/rnc/:rncId')
+  findByRnc(@Param('rncId') rncId: string) {
+    return this.materialService.findByRnc(rncId);
   }
 
   @Patch(':id')

@@ -20,19 +20,20 @@ export class RncImageController {
   constructor(private readonly rncImageService: RncImageService) {}
 
   @Post()
-   @UseInterceptors(
-      FileInterceptor('file', {
-        limits: {
-          fileSize: 10 * 1024 * 1024, // Limite de tamanho (10 MB)
-        },
-        fileFilter: imageFileFilter, // Validação de tipo de arquivo
-      }),
-    )
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: {
+        fileSize: 10 * 1024 * 1024, // Limite de tamanho (10 MB)
+      },
+      fileFilter: imageFileFilter, // Validação de tipo de arquivo
+    }),
+  )
   async uploadImage(
     @UploadedFile() file: Express.Multer.File,
     @Body('nonConformityId') nonConformityId: string,
+    @Body('description') description: string,
   ) {
-    return this.rncImageService.create(file, nonConformityId);
+    return this.rncImageService.create(file, nonConformityId, description);
   }
 
   @Get(':nonConformityId')

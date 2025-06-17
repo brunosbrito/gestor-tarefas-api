@@ -26,8 +26,8 @@ export class NonConformityController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.nonConformityService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    return await this.nonConformityService.findOne(id);
   }
 
   @Put(':id')
