@@ -109,7 +109,15 @@ export class ActivitiesService {
       getCollaborators,
       user,
     );
-    this.sendTelegramMessage(message, project.groupNumber);
+
+    const chatMap = new Map<number, string>([
+      [1, '-1002696659970'],
+      [19, '-1002696659970'],
+      [4, '-1002673887037'],
+    ]);
+
+    const chatId = chatMap.get(savedActivity.process.id) || project.groupNumber; // chatId padrão
+    this.sendTelegramMessage(message, chatId);
 
     return savedActivity;
   }
@@ -246,8 +254,18 @@ export class ActivitiesService {
     );
 
     // Enviar mensagem de atualização via Telegram
-    const message = this.generateTelegramUpdateMessage(updatedActivity, user);
-    this.sendTelegramMessage(message, updatedActivity.project.groupNumber);
+    const message = this.generateTelegramUpdateMessage(activity, user);
+
+    const chatMap = new Map<number, string>([
+      [1, '-1002696659970'],
+      [19, '-1002696659970'],
+      [4, '-1002673887037'],
+    ]);
+
+    const chatId =
+      chatMap.get(activity.process.id) || updatedActivity.project.groupNumber;
+
+    this.sendTelegramMessage(message, chatId);
 
     return updatedActivity;
   }
@@ -316,7 +334,17 @@ export class ActivitiesService {
 **Tempo Previsto:** ${activity.estimatedTime}
 **Obs:** ${activity.observation}
 **Atualizado por:** ${user.username}`;
-    this.sendTelegramMessage(message, activity.project.groupNumber);
+
+    const chatMap = new Map<number, string>([
+      [1, '-1002696659970'],
+      [19, '-1002696659970'],
+      [4, '-1002673887037'],
+    ]);
+
+    const chatId =
+      chatMap.get(activity.process.id) || activity.project.groupNumber;
+
+    this.sendTelegramMessage(message, chatId);
 
     return await this.activityRepository.save(activity);
   }
@@ -463,8 +491,8 @@ export class ActivitiesService {
 **O.S:** ${orderService.serviceOrderNumber} 
 **Nº Projeto:** ${orderService.projectNumber} 
 **Qtd:** ${activity.quantity}  
-**Tarefa Macro:** ${activity.macroTask.name} 
-**Processo:**  ${activity.process.name} 
+**Tarefa Macro:** ${activity?.macroTask.name} 
+**Processo:**  ${activity?.process.name} 
 **Atividade:**  ${activity.description}
 **Equipe:** ${collaborators.map((collaborator) => collaborator.name).join(', ')} 
 **Data Criação:** ${dayjs(activity.createdAt).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm')}
@@ -507,8 +535,8 @@ export class ActivitiesService {
 **O.S:** ${activity.serviceOrder.serviceOrderNumber}
 **Nº Projeto:** ${activity.serviceOrder.projectNumber}
 **Qtd:** ${activity.quantity}
-**Tarefa Macro:** ${activity.macroTask.name} 
-**Processo:**  ${activity.process.name} 
+**Tarefa Macro:** ${activity?.macroTask.name} 
+**Processo:**  ${activity?.process.name} 
 **Atividade:**  ${activity.description}
 **Equipe:** ${activity.collaborators.map((collaborator) => collaborator.name).join(', ')}
 **Data de inicio:** ${dayjs(activity.startDate).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm')}
@@ -525,7 +553,6 @@ export class ActivitiesService {
 **Qtd:** ${activity.quantity}
 **Tarefa Macro:** ${activity.macroTask.name} 
 **Processo:**  ${activity.process.name} 
-**Processo:**  ${activity.process}
 **Atividade:**  ${activity.description}
 **Equipe:** ${activity.collaborators.map((collaborator) => collaborator.name).join(', ')}
 **Data Pause:** ${dayjs(activity.pauseDate).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm')}
@@ -543,7 +570,6 @@ export class ActivitiesService {
 **Qtd:** ${activity.quantity}
 **Tarefa Macro:** ${activity.macroTask.name} 
 **Processo:**  ${activity.process.name}
-**Processo:**  ${activity.process}
 **Atividade:**  ${activity.description}
 **Equipe:** ${activity.collaborators.map((collaborator) => collaborator.name).join(', ')}
 **Data Conclusao:** ${dayjs(activity.endDate).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm')}
@@ -561,7 +587,6 @@ export class ActivitiesService {
 **Peso:** ${activity.quantity}
 **Tarefa Macro:** ${activity.macroTask.name} 
 **Processo:**  ${activity.process.name} 
-**Processo:**  ${activity.process} 
 **Atividade:**  ${activity.description}
 **Equipe:** ${activity.collaborators.map((collaborator) => collaborator.name).join(', ')} 
 **Data Criação:** ${dayjs(activity.createdAt).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm')}
