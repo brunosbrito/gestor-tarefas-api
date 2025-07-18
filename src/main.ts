@@ -9,6 +9,7 @@ async function bootstrap() {
       'https://gestor-tarefas.gmxindustrial.com.br',
       'http://localhost:4200',
       'http://localhost:8080',
+      'https://lovable.dev',
     ],
     methods: 'GET,POST,PUT,DELETE,PATCH',
     allowedHeaders: 'Content-Type, Authorization',

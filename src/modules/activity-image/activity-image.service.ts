@@ -35,7 +35,7 @@ export class ActivityImageService {
 
     const savedImageWithActivity = await this.activityRepository.findOne({
       where: { id: createActivityImageDto.activityId },
-      relations: ['serviceOrder', 'project'],
+      relations: ['serviceOrder', 'project', 'process'],
     });
 
     const newImage = this.activityImageRepository.create({
@@ -50,10 +50,20 @@ export class ActivityImageService {
     const senderName = createdByUser.username;
     const imageUrl = savedImage.imagePath;
 
+    const chatMap = new Map<number, string>([
+      [1, '-1002696659970'],
+      [19, '-1002696659970'],
+      [4, '-1002673887037'],
+    ]);
+
+    const chatId =
+      chatMap.get(savedImageWithActivity.process.id) ||
+      savedImageWithActivity.project.groupNumber;
+
     await this.sendTelegramMessageWithImage(
       message,
-      savedImageWithActivity.project.groupNumber,
-      imageUrl, // Passa o caminho da imagem para o envio
+      chatId,
+      imageUrl,
       senderName,
     );
 
@@ -63,7 +73,7 @@ export class ActivityImageService {
   private async sendTelegramMessageWithImage(
     message: string,
     chat_id: string,
-    imagePath: string, // Agora, você recebe o caminho da imagem
+    imagePath: string,
     senderName: string,
   ) {
     const telegramBotToken = '6355918410:AAHoYDbxazgOA7scKgH5dN-x6nVb_qk84kY';
@@ -74,7 +84,6 @@ export class ActivityImageService {
     formData.append('caption', `${message}\nEnviado por: ${senderName}`);
 
     const imageFilePath = path.join(__dirname, '..', '..', '..', imagePath);
-    console.log('service', imageFilePath);
 
     try {
       // Verifique se o arquivo existe antes de tentar lê-lo

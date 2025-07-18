@@ -36,7 +36,7 @@ import { ValuePerPositionModule } from './modules/valuePerPosition/value-per-pos
       database: process.env.DB_DATABASE,
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
-      synchronize: true, // Mantenha como true apenas em desenvolvimento
+      synchronize: false, // Mantenha como true apenas em desenvolvimento
       entities: ['dist/**/*.entity.js'],
       migrations: ['src/migrations/*.ts'],
     }),
