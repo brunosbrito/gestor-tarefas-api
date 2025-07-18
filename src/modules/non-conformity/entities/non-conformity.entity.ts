@@ -69,6 +69,12 @@ export class NonConformity {
   @ManyToOne(() => Project, (project) => project.nonConformities)
   project: Project;
 
-  @ManyToOne(() => ServiceOrder, (serviceOrder) => serviceOrder.nonConformities)
+  @ManyToOne(
+    () => ServiceOrder,
+    (serviceOrder) => serviceOrder.nonConformities,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
   serviceOrder: ServiceOrder;
 }

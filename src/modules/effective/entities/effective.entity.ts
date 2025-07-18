@@ -28,7 +28,7 @@ export class Effective {
   @Column({ type: 'varchar' })
   typeRegister?: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   reason: string;
 
   @Column({ type: 'varchar' })

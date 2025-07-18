@@ -13,7 +13,9 @@ export class ActivityHistory {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Activity, (activity) => activity.history)
+  @ManyToOne(() => Activity, (activity) => activity.history, {
+    onDelete: 'CASCADE',
+  })
   activity: Activity;
 
   @Column()

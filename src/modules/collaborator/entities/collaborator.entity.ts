@@ -25,6 +25,9 @@ export class Collaborator {
   @Column()
   role: string;
 
+  @Column({ default: 'Produção' })
+  sector: string;
+
   @ManyToOne(() => Team, (team) => team.collaborators, {
     nullable: true,
     onDelete: 'SET NULL',
@@ -44,6 +47,6 @@ export class Collaborator {
   updatedAt: Date;
 
   @ManyToOne(() => ValuePerPosition, (position) => position.collaborators)
-  @JoinColumn({ name: "position_id" })
+  @JoinColumn({ name: 'position_id' })
   position: ValuePerPosition;
 }

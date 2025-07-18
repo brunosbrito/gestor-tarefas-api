@@ -84,13 +84,18 @@ export class Activity {
   @OneToMany(
     () => ActivityHistory,
     (activityHistory: ActivityHistory) => activityHistory.activity,
+    { cascade: true },
   )
   history: ActivityHistory[];
 
-  @OneToMany(() => WorkedHours, (workedHours) => workedHours.atividade)
+  @OneToMany(() => WorkedHours, (workedHours) => workedHours.atividade, {
+    cascade: true,
+  })
   workedHours: WorkedHours[];
 
-  @OneToMany(() => ActivityImage, (activityImage) => activityImage.activity)
+  @OneToMany(() => ActivityImage, (activityImage) => activityImage.activity, {
+    cascade: true,
+  })
   images: ActivityImage[];
 
   @Column({ type: 'timestamp', nullable: true })
@@ -120,11 +125,17 @@ export class Activity {
   @Column({ type: 'int', default: 0 })
   completedQuantity: number;
 
-  @ManyToOne(() => MacroTask, (macroTask) => macroTask.activities, { nullable: true, onDelete: "SET NULL" })
-  @JoinColumn({ name: "macroTask" })
+  @ManyToOne(() => MacroTask, (macroTask) => macroTask.activities, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'macroTask' })
   macroTask: MacroTask;
 
-  @ManyToOne(() => Process, (process) => process.activities, { nullable: true, onDelete: "SET NULL" })
-  @JoinColumn({ name: "process" })
+  @ManyToOne(() => Process, (process) => process.activities, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'process' })
   process: Process;
 }

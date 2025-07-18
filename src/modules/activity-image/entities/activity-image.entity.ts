@@ -7,7 +7,9 @@ export class ActivityImage {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Activity, (activity) => activity.images)
+  @ManyToOne(() => Activity, (activity) => activity.images, {
+    onDelete: 'CASCADE',
+  })
   activity: Activity;
 
   @Column()

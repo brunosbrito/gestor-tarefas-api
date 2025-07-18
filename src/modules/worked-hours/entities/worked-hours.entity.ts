@@ -7,7 +7,9 @@ export class WorkedHours {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Activity, (activity) => activity.workedHours)
+  @ManyToOne(() => Activity, (activity) => activity.workedHours, {
+    onDelete: 'CASCADE',
+  })
   atividade: Activity;
 
   @ManyToOne(() => Collaborator, (collaborator) => collaborator.workedHours)

@@ -8,4 +8,10 @@ export class CreateCollaboratorDto {
   @IsNumber()
   @Min(1)
   positionId: number;
+
+  @IsString()
+  role: string;
+
+  @IsString()
+  sector: string;
 }

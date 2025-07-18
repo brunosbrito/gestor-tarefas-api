@@ -34,10 +34,18 @@ export class ServiceOrder {
   @ManyToOne(() => User, (user) => user.assignedOrders, { nullable: true })
   assignedUser: User;
 
-  @OneToMany(() => Activity, (activity) => activity.serviceOrder)
+  @OneToMany(() => Activity, (activity) => activity.serviceOrder, {
+    cascade: true,
+  })
   activities: Activity[];
 
-  @OneToMany(() => NonConformity, (nonConformity) => nonConformity.serviceOrder)
+  @OneToMany(
+    () => NonConformity,
+    (nonConformity) => nonConformity.serviceOrder,
+    {
+      cascade: true,
+    },
+  )
   nonConformities: NonConformity[];
 
   @Column({ type: 'timestamp', nullable: true })

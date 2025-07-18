@@ -71,7 +71,21 @@ export class ServiceOrderService {
   }
 
   async remove(id: number): Promise<void> {
-    const serviceOrder = await this.findOne(id);
+    const serviceOrder = await this.serviceOrderRepository.findOne({
+      where: { id },
+      relations: [
+        'activities',
+        'activities.history',
+        'activities.images',
+        'activities.workedHours',
+        'nonConformities',
+      ],
+    });
+
+    if (!serviceOrder) {
+      throw new NotFoundException('Ordem de serviço não encontrada.');
+    }
+
     await this.serviceOrderRepository.remove(serviceOrder);
   }
 
