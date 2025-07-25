@@ -21,9 +21,9 @@ export class ActivityHistoryService {
     createActivityHistoryDto: CreateActivityHistoryDto,
     userId: number,
   ): Promise<ActivityHistory> {
-    const { activityId, status, description } = createActivityHistoryDto;
+    const { activityId, status, description, DayQuantity } =
+      createActivityHistoryDto;
 
-    // Encontrar a atividade
     const activity = await this.activityRepository.findOne({
       where: { id: activityId },
     });
@@ -31,7 +31,6 @@ export class ActivityHistoryService {
       throw new NotFoundException('Activity not found');
     }
 
-    // Encontrar o usuário
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
@@ -42,6 +41,7 @@ export class ActivityHistoryService {
       status,
       description,
       changedBy: user,
+      DayQuantity: DayQuantity || null,
     });
 
     return this.activityHistoryRepository.save(activityHistory);

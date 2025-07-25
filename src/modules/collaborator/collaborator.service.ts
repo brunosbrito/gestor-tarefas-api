@@ -18,14 +18,16 @@ export class CollaboratorService {
   async create(
     createCollaboratorDto: CreateCollaboratorDto,
   ): Promise<Collaborator> {
-
-
-    const collaborator = this.collaboratorRepository.create(createCollaboratorDto);
+    const collaborator = this.collaboratorRepository.create(
+      createCollaboratorDto,
+    );
     return this.collaboratorRepository.save(collaborator);
   }
 
   async findAll(): Promise<Collaborator[]> {
-    return this.collaboratorRepository.find({ relations: ['team', 'position'] });
+    return this.collaboratorRepository.find({
+      relations: ['team', 'position'],
+    });
   }
 
   async findOne(id: number): Promise<Collaborator> {
@@ -54,5 +56,19 @@ export class CollaboratorService {
   async remove(id: number): Promise<void> {
     const collaborator = await this.findOne(id);
     await this.collaboratorRepository.remove(collaborator);
+  }
+
+  async updateStatus(id: number, status: boolean) {
+    const collaborator = await this.collaboratorRepository.findOne({
+      where: { id },
+    });
+
+    if (!collaborator) {
+      throw new NotFoundException('Colaborador não encontrado');
+    }
+
+    collaborator.status = status;
+
+    return this.collaboratorRepository.save(collaborator);
   }
 }

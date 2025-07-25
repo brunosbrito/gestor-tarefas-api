@@ -28,6 +28,9 @@ export class Collaborator {
   @Column({ default: 'Produção' })
   sector: string;
 
+  @Column({ default: true })
+  status: boolean;
+
   @ManyToOne(() => Team, (team) => team.collaborators, {
     nullable: true,
     onDelete: 'SET NULL',

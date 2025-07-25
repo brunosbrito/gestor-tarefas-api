@@ -1,4 +1,10 @@
-import { IsString, IsOptional, IsNumber, Min } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  Min,
+  IsBoolean,
+} from 'class-validator';
 
 export class UpdateCollaboratorDto {
   @IsString()
@@ -9,4 +15,10 @@ export class UpdateCollaboratorDto {
   @Min(1)
   positionId?: number;
 
+  @IsBoolean()
+  status?: boolean;
+
+  @IsString()
+  @IsOptional()
+  role?: string;
 }

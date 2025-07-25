@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsNumber,
+  isNumber,
+  IsOptional,
+} from 'class-validator';
 
 export class CreateActivityHistoryDto {
   @IsNumber()
@@ -11,6 +17,10 @@ export class CreateActivityHistoryDto {
   @IsString()
   @IsNotEmpty()
   description: string;
+
+  @IsNumber()
+  @IsOptional()
+  DayQuantity?: number;
 
   @IsNumber()
   changedBy: number; // Representa o ID do usuário que fez a alteração

@@ -21,6 +21,9 @@ export class ActivityHistory {
   @Column()
   status: string;
 
+  @Column({ nullable: true })
+  DayQuantity: number;
+
   @Column()
   description: string;
 

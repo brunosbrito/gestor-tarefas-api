@@ -101,6 +101,7 @@ export class ActivitiesService {
       'Criada',
       'Atividade criada',
       user,
+      0, // DayQuantity is not applicable for creation
     );
 
     const message = this.generateTelegramMessage(
@@ -159,7 +160,7 @@ export class ActivitiesService {
     updateActivityDto: UpdateActivityDto,
   ): Promise<Activity> {
     const activity = await this.findOne(id);
-
+    const user = await this.getUser(updateActivityDto.changedBy);
     // Atualizar os colaboradores se existirem no DTO
     if (updateActivityDto.collaborators) {
       activity.collaborators = await this.getCollaborators(
@@ -174,6 +175,9 @@ export class ActivitiesService {
         updateActivityDto.pauseDate,
       );
       activity.totalTime = (activity.totalTime || 0) + timePaused;
+      const quantidade = (activity.quantity +=
+        updateActivityDto.DayQuantity || 0);
+      this.updateCompletedQuantity(activity.id, quantidade, user.id);
     }
 
     if (
@@ -220,7 +224,8 @@ export class ActivitiesService {
       activity.observation = updateActivityDto.observation;
     if (updateActivityDto.estimatedTime)
       activity.estimatedTime = updateActivityDto.estimatedTime;
-
+    if (updateActivityDto.quantity)
+      activity.quantity = updateActivityDto.quantity;
     // Atualizar colaboradores, se necessário
     if (updateActivityDto.collaborators) {
       activity.collaborators = await this.getCollaborators(
@@ -241,16 +246,17 @@ export class ActivitiesService {
     const updatedActivity = await this.activityRepository.save(activity);
 
     // Registrar o histórico de atualização
-    const user = await this.getUser(updateActivityDto.changedBy);
     const status = this.generateActivityStatusMessage(
       activity,
       updateActivityDto,
     );
+
     await this.recordActivityHistory(
       updatedActivity,
       'Atualizada',
       status,
       user,
+      updateActivityDto.DayQuantity || null,
     );
 
     // Enviar mensagem de atualização via Telegram
@@ -325,7 +331,7 @@ export class ActivitiesService {
 **O.S:** ${activity.serviceOrder.serviceOrderNumber} 
 **Nº Projeto:** ${activity.serviceOrder.projectNumber} 
 **Qtd:** ${activity.quantity}
-**Progresso:** ${Math.round(this.calculateProgress(activity))}% ${activity.completedQuantity} de ${activity.quantity}
+**Progresso:** ${Math.round(this.calculateProgress(activity))}% ${activity.completedQuantity} / ${activity.quantity}
 **Tarefa Macro:** ${activity.macroTask.name} 
 **Processo:**  ${activity.process.name} 
 **Atividade:**  ${activity.description}
@@ -392,12 +398,14 @@ export class ActivitiesService {
     status: string,
     description: string,
     user: User,
+    DayQuantity?: number,
   ): Promise<ActivityHistory> {
     const activityHistory = this.activityHistoryRepository.create({
       activity,
       status,
       description,
       changedBy: user,
+      DayQuantity,
     });
     return this.activityHistoryRepository.save(activityHistory);
   }
@@ -567,7 +575,7 @@ export class ActivitiesService {
 
 **O.S:** ${activity.serviceOrder.serviceOrderNumber}
 **Nº Projeto:** ${activity.serviceOrder.projectNumber}
-**Qtd:** ${activity.quantity}
+**Qtd:** ${activity.quantity}/${activity.completedQuantity}
 **Tarefa Macro:** ${activity.macroTask.name} 
 **Processo:**  ${activity.process.name}
 **Atividade:**  ${activity.description}

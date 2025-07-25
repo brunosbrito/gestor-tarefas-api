@@ -82,4 +82,12 @@ export class UpdateActivityDto extends PartialType(CreateActivityDto) {
   @IsNumber()
   @IsNotEmpty()
   process: Process;
+
+  @IsNumber()
+  @IsOptional()
+  quantity?: number;
+
+  @IsNumber()
+  @IsOptional()
+  DayQuantity?: number;
 }

@@ -7,10 +7,12 @@ import {
   Body,
   ParseIntPipe,
   Put,
+  Patch,
 } from '@nestjs/common';
 import { CollaboratorService } from './collaborator.service';
 import { CreateCollaboratorDto } from './dto/create-collaborator.dto';
 import { UpdateCollaboratorDto } from './dto/update-collaborator.dto';
+import { UpdateCollaboratorStatusDto } from './dto/update-collaborator-status.dto';
 
 @Controller('collaborators')
 export class CollaboratorController {
@@ -42,5 +44,13 @@ export class CollaboratorController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.collaboratorService.remove(id);
+  }
+
+  @Patch(':id/status')
+  partialUpdate(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() { status }: UpdateCollaboratorStatusDto,
+  ) {
+    return this.collaboratorService.updateStatus(id, status);
   }
 }
