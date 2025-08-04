@@ -175,9 +175,9 @@ export class ActivitiesService {
         updateActivityDto.pauseDate,
       );
       activity.totalTime = (activity.totalTime || 0) + timePaused;
-      const quantidade = (activity.quantity +=
-        updateActivityDto.DayQuantity || 0);
-      this.updateCompletedQuantity(activity.id, quantidade, user.id);
+      const quantidade = updateActivityDto.DayQuantity || 0;
+      await this.updateCompletedQuantity(activity.id, quantidade, user.id);
+      return activity;
     }
 
     if (
@@ -325,8 +325,12 @@ export class ActivitiesService {
       throw new Error('Atividade não encontrada');
     }
 
-    activity.completedQuantity = completedQuantity;
+    activity.completedQuantity =
+      (activity.completedQuantity || 0) + completedQuantity;
+    const savedActivity = await this.activityRepository.save(activity);
+
     const user = await this.getUser(changedBy);
+
     const message = `🔄 **Atividade Atualizada Nº ${activity.cod_sequencial}**
 **O.S:** ${activity.serviceOrder.serviceOrderNumber} 
 **Nº Projeto:** ${activity.serviceOrder.projectNumber} 
@@ -352,7 +356,7 @@ export class ActivitiesService {
 
     this.sendTelegramMessage(message, chatId);
 
-    return await this.activityRepository.save(activity);
+    return savedActivity;
   }
 
   private async getCollaborators(
