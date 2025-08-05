@@ -89,17 +89,4 @@ export class ActivitiesController {
   findByServiceOrder(@Param('id') id: number) {
     return this.activitiesService.findByServiceOrder(id);
   }
-
-  @Patch(':id/completedQuantity')
-  async updateCompletedQuantity(
-    @Param('id') id: number,
-    @Body() updateCompletedQuantityDto: UpdateCompletedQuantityDto,
-  ) {
-    const { completedQuantity, changedBy } = updateCompletedQuantityDto;
-    return this.activitiesService.updateCompletedQuantity(
-      id,
-      completedQuantity,
-      changedBy,
-    );
-  }
 }

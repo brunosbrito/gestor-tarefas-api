@@ -169,16 +169,6 @@ export class ActivitiesService {
     }
 
     // Atualizar o status da atividade se necessário
-    if (updateActivityDto.status === 'Paralizadas') {
-      const timePaused = this.calculateTimeDifference(
-        activity.startDate,
-        updateActivityDto.pauseDate,
-      );
-      activity.totalTime = (activity.totalTime || 0) + timePaused;
-      const quantidade = updateActivityDto.DayQuantity || 0;
-      await this.updateCompletedQuantity(activity.id, quantidade, user.id);
-      return activity;
-    }
 
     if (
       updateActivityDto.status === 'Em execução' &&
@@ -243,9 +233,19 @@ export class ActivitiesService {
         where: { id: Number(updateActivityDto.process) },
       });
 
+    if (updateActivityDto.status === 'Paralizadas') {
+      const timePaused = this.calculateTimeDifference(
+        activity.startDate,
+        updateActivityDto.pauseDate,
+      );
+      activity.totalTime = (activity.totalTime || 0) + timePaused;
+      const quantidade = updateActivityDto.DayQuantity || 0;
+      activity.completedQuantity =
+        (activity.completedQuantity || 0) + quantidade;
+    }
+
     const updatedActivity = await this.activityRepository.save(activity);
 
-    // Registrar o histórico de atualização
     const status = this.generateActivityStatusMessage(
       activity,
       updateActivityDto,
@@ -303,60 +303,6 @@ export class ActivitiesService {
         'macroTask',
       ],
     });
-  }
-
-  async updateCompletedQuantity(
-    id: number,
-    completedQuantity: number,
-    changedBy: number,
-  ): Promise<Activity> {
-    const activity = await this.activityRepository.findOne({
-      where: { id },
-      relations: [
-        'serviceOrder',
-        'collaborators',
-        'project',
-        'process',
-        'macroTask',
-      ],
-    });
-
-    if (!activity) {
-      throw new Error('Atividade não encontrada');
-    }
-
-    activity.completedQuantity =
-      (activity.completedQuantity || 0) + completedQuantity;
-    const savedActivity = await this.activityRepository.save(activity);
-
-    const user = await this.getUser(changedBy);
-
-    const message = `🔄 **Atividade Atualizada Nº ${activity.cod_sequencial}**
-**O.S:** ${activity.serviceOrder.serviceOrderNumber} 
-**Nº Projeto:** ${activity.serviceOrder.projectNumber} 
-**Qtd:** ${activity.quantity}
-**Progresso:** ${Math.round(this.calculateProgress(activity))}% ${activity.completedQuantity} / ${activity.quantity}
-**Tarefa Macro:** ${activity.macroTask.name} 
-**Processo:**  ${activity.process.name} 
-**Atividade:**  ${activity.description}
-**Equipe:** ${activity.collaborators.map((collaborator) => collaborator.name).join(', ')} 
-**Data Criação:** ${dayjs(activity.createdAt).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm')}
-**Tempo Previsto:** ${activity.estimatedTime}
-**Obs:** ${activity.observation}
-**Atualizado por:** ${user.username}`;
-
-    const chatMap = new Map<number, string>([
-      [1, '-1002696659970'],
-      [19, '-1002696659970'],
-      [4, '-1002673887037'],
-    ]);
-
-    const chatId =
-      chatMap.get(activity.process.id) || activity.project.groupNumber;
-
-    this.sendTelegramMessage(message, chatId);
-
-    return savedActivity;
   }
 
   private async getCollaborators(
@@ -547,6 +493,7 @@ export class ActivitiesService {
 **O.S:** ${activity.serviceOrder.serviceOrderNumber}
 **Nº Projeto:** ${activity.serviceOrder.projectNumber}
 **Qtd:** ${activity.quantity}
+**Progresso:** ${Math.round(this.calculateProgress(activity))}% ${activity.completedQuantity} / ${activity.quantity}
 **Tarefa Macro:** ${activity?.macroTask.name} 
 **Processo:**  ${activity?.process.name} 
 **Atividade:**  ${activity.description}
@@ -563,6 +510,7 @@ export class ActivitiesService {
 **O.S:** ${activity.serviceOrder.serviceOrderNumber}
 **Nº Projeto:** ${activity.serviceOrder.projectNumber}
 **Qtd:** ${activity.quantity}
+**Progresso:** ${Math.round(this.calculateProgress(activity))}% ${activity.completedQuantity} / ${activity.quantity}
 **Tarefa Macro:** ${activity.macroTask.name} 
 **Processo:**  ${activity.process.name} 
 **Atividade:**  ${activity.description}
@@ -579,7 +527,8 @@ export class ActivitiesService {
 
 **O.S:** ${activity.serviceOrder.serviceOrderNumber}
 **Nº Projeto:** ${activity.serviceOrder.projectNumber}
-**Qtd:** ${activity.quantity}/${activity.completedQuantity}
+**Qtd:** ${activity.quantity}
+**Progresso:** ${Math.round(this.calculateProgress(activity))}% ${activity.completedQuantity} / ${activity.quantity}
 **Tarefa Macro:** ${activity.macroTask.name} 
 **Processo:**  ${activity.process.name}
 **Atividade:**  ${activity.description}
@@ -596,6 +545,7 @@ export class ActivitiesService {
 **O.S:** ${activity.serviceOrder.serviceOrderNumber} 
 **Nº Projeto:** ${activity.serviceOrder.projectNumber} 
 **Qtd:** ${activity.quantity}
+**Progresso:** ${Math.round(this.calculateProgress(activity))}% ${activity.completedQuantity} / ${activity.quantity}
 **Peso:** ${activity.quantity}
 **Tarefa Macro:** ${activity.macroTask.name} 
 **Processo:**  ${activity.process.name} 
