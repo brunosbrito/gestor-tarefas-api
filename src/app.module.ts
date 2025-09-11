@@ -18,6 +18,7 @@ import { join } from 'path';
 import { AppController } from './app.controller';
 import { NonConformityModule } from './modules/non-conformity/non-conformity.module';
 import { ValuePerPositionModule } from './modules/valuePerPosition/value-per-position.module';
+import { AuthClientModule } from './modules/auth-client/auth-client.module';
 
 @Module({
   imports: [
@@ -31,12 +32,12 @@ import { ValuePerPositionModule } from './modules/valuePerPosition/value-per-pos
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT),
-      database: process.env.DB_DATABASE,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      synchronize: false, // Mantenha como true apenas em desenvolvimento
+      host: process.env.DB_HOST || 'localhost',
+      port: Number(process.env.DB_PORT) || 5432,
+      database: process.env.DB_DATABASE || 'db',
+      username: process.env.DB_USERNAME || 'postgres',
+      password: process.env.DB_PASSWORD || 'Digitalsegurogml2024!',
+      synchronize: true, // Mantenha como true apenas em desenvolvimento
       entities: ['dist/**/*.entity.js'],
       migrations: ['src/migrations/*.ts'],
     }),
@@ -54,6 +55,7 @@ import { ValuePerPositionModule } from './modules/valuePerPosition/value-per-pos
     EffectiveModule,
     NonConformityModule,
     ValuePerPositionModule,
+    AuthClientModule,
   ],
   controllers: [AppController],
   providers: [],

@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(/C:\\Users\\Yasmin\\Desktop\\dev\\gestor-tarefas-api/**)",
+      "Read(/C:\\Users\\Yasmin\\Desktop\\dev\\gestor-tarefas-api/**)",
+      "Read(/C:\\Users\\Yasmin\\Desktop\\dev\\gestor-tarefas-api\\src/**)",
+      "Read(/C:\\Users\\Yasmin\\Desktop\\dev\\gestor-tarefas-api\\src/**)",
+      "Read(/C:\\Users\\Yasmin\\Desktop\\dev\\gestor-tarefas-api\\src\\modules\\activities/**)",
+      "Read(/C:\\Users\\Yasmin\\Desktop\\dev\\gestor-tarefas-api\\src\\modules\\activities\\entities/**)",
+      "Read(/C:\\Users\\Yasmin\\Desktop\\dev\\gestor-tarefas-api\\src\\modules\\auth/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
