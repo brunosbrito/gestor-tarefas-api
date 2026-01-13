@@ -58,22 +58,36 @@ export class ActivitiesService {
       ...activityData
     } = createActivityDto;
 
+    // Suporta tanto collaborators quanto collaboratorIds (compatibilidade frontend)
+    let collaboratorIds = collaborators;
+    const collaboratorIdsFromDto = (createActivityDto as any).collaboratorIds;
+    if (collaboratorIdsFromDto) {
+      // Se vier como string JSON, fazer parse
+      collaboratorIds = typeof collaboratorIdsFromDto === 'string'
+        ? JSON.parse(collaboratorIdsFromDto)
+        : collaboratorIdsFromDto;
+    }
+
     const [getCollaborators, project, orderService, user] = await Promise.all([
-      this.getCollaborators(collaborators),
+      this.getCollaborators(collaboratorIds),
       this.getProject(projectId),
       this.getOrderService(orderServiceId),
       this.getUser(Number(createdBy)),
     ]);
 
-    const macroTask = createActivityDto.macroTask
+    // Suporta tanto macroTask quanto macroTaskId (compatibilidade frontend)
+    const macroTaskId = (createActivityDto as any).macroTaskId || createActivityDto.macroTask;
+    const macroTask = macroTaskId
       ? await this.macroTaskRepository.findOne({
-          where: { id: Number(createActivityDto.macroTask) },
+          where: { id: Number(macroTaskId) },
         })
       : null;
 
-    const process = createActivityDto.process
+    // Suporta tanto process quanto processId (compatibilidade frontend)
+    const processId = (createActivityDto as any).processId || createActivityDto.process;
+    const process = processId
       ? await this.processRepository.findOne({
-          where: { id: Number(createActivityDto.process) },
+          where: { id: Number(processId) },
         })
       : null;
 
@@ -117,7 +131,7 @@ export class ActivitiesService {
       [4, '-1002673887037'],
     ]);
 
-    const chatId = chatMap.get(savedActivity.process.id) || project.groupNumber; // chatId padrão
+    const chatId = chatMap.get(savedActivity?.process?.id) || project?.groupNumber; // chatId padrão
     this.sendTelegramMessage(message, chatId);
 
     return savedActivity;
@@ -446,17 +460,17 @@ export class ActivitiesService {
     return `
 🆕 **Nova Atividade Criada Nº ${activity.cod_sequencial}**
 
-**O.S:** ${orderService.serviceOrderNumber} 
-**Nº Projeto:** ${orderService.projectNumber} 
-**Qtd:** ${activity.quantity}  
-**Tarefa Macro:** ${activity?.macroTask.name} 
-**Processo:**  ${activity?.process.name} 
+**O.S:** ${orderService?.serviceOrderNumber || 'N/A'}
+**Nº Projeto:** ${orderService?.projectNumber || 'N/A'}
+**Qtd:** ${activity.quantity}
+**Tarefa Macro:** ${activity?.macroTask?.name || 'N/A'}
+**Processo:**  ${activity?.process?.name || 'N/A'}
 **Atividade:**  ${activity.description}
-**Equipe:** ${collaborators.map((collaborator) => collaborator.name).join(', ')} 
+**Equipe:** ${collaborators?.map((collaborator) => collaborator?.name).filter(Boolean).join(', ') || 'N/A'}
 **Data Criação:** ${dayjs(activity.createdAt).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm')}
 **Tempo Previsto:** ${activity.estimatedTime}
-**Obs:** ${activity.observation}
-**Criado por:** ${user.username}
+**Obs:** ${activity.observation || 'N/A'}
+**Criado por:** ${user?.username || 'N/A'}
     `;
   }
 

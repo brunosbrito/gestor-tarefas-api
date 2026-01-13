@@ -33,10 +33,10 @@ import { ValuePerPositionModule } from './modules/valuePerPosition/value-per-pos
       type: 'postgres',
       host: process.env.DB_HOST,
       port: Number(process.env.DB_PORT),
-      database: process.env.DB_DATABASE,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      synchronize: false, // Mantenha como true apenas em desenvolvimento
+      database: 'gestor_tarefas',
+      username: 'postgres',
+      password: 'Digitalsegurogml2024!',
+      synchronize: true, // Mantenha como true apenas em desenvolvimento
       entities: ['dist/**/*.entity.js'],
       migrations: ['src/migrations/*.ts'],
     }),
