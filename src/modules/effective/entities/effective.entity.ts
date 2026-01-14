@@ -22,7 +22,7 @@ export class Effective {
   @Column({ type: 'varchar', length: 50 })
   role: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   project: string;
 
   @Column({ type: 'varchar' })
