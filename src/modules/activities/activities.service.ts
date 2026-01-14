@@ -113,6 +113,12 @@ export class ActivitiesService {
 
     const savedActivity = await this.activityRepository.save(activity);
 
+    // Buscar atividade com todas as relações para o Telegram
+    const activityWithRelations = await this.activityRepository.findOne({
+      where: { id: savedActivity.id },
+      relations: ['macroTask', 'process', 'collaborators', 'project', 'serviceOrder'],
+    });
+
     await this.recordActivityHistory(
       savedActivity,
       'Criada',
@@ -122,7 +128,7 @@ export class ActivitiesService {
     );
 
     const message = this.generateTelegramMessage(
-      savedActivity,
+      activityWithRelations || savedActivity,
       orderService,
       getCollaborators,
       user,
@@ -135,10 +141,10 @@ export class ActivitiesService {
     ]);
 
     const chatId =
-      chatMap.get(savedActivity?.process?.id) || project?.groupNumber; // chatId padrão
+      chatMap.get(activityWithRelations?.process?.id) || project?.groupNumber; // chatId padrão
     this.sendTelegramMessage(message, chatId);
 
-    return savedActivity;
+    return activityWithRelations || savedActivity;
   }
 
   async findAll(): Promise<Activity[]> {
