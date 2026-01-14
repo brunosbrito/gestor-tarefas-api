@@ -63,9 +63,10 @@ export class ActivitiesService {
     const collaboratorIdsFromDto = (createActivityDto as any).collaboratorIds;
     if (collaboratorIdsFromDto) {
       // Se vier como string JSON, fazer parse
-      collaboratorIds = typeof collaboratorIdsFromDto === 'string'
-        ? JSON.parse(collaboratorIdsFromDto)
-        : collaboratorIdsFromDto;
+      collaboratorIds =
+        typeof collaboratorIdsFromDto === 'string'
+          ? JSON.parse(collaboratorIdsFromDto)
+          : collaboratorIdsFromDto;
     }
 
     const [getCollaborators, project, orderService, user] = await Promise.all([
@@ -76,7 +77,8 @@ export class ActivitiesService {
     ]);
 
     // Suporta tanto macroTask quanto macroTaskId (compatibilidade frontend)
-    const macroTaskId = (createActivityDto as any).macroTaskId || createActivityDto.macroTask;
+    const macroTaskId =
+      (createActivityDto as any).macroTaskId || createActivityDto.macroTask;
     const macroTask = macroTaskId
       ? await this.macroTaskRepository.findOne({
           where: { id: Number(macroTaskId) },
@@ -84,7 +86,8 @@ export class ActivitiesService {
       : null;
 
     // Suporta tanto process quanto processId (compatibilidade frontend)
-    const processId = (createActivityDto as any).processId || createActivityDto.process;
+    const processId =
+      (createActivityDto as any).processId || createActivityDto.process;
     const process = processId
       ? await this.processRepository.findOne({
           where: { id: Number(processId) },
@@ -131,7 +134,8 @@ export class ActivitiesService {
       [4, '-1002673887037'],
     ]);
 
-    const chatId = chatMap.get(savedActivity?.process?.id) || project?.groupNumber; // chatId padrão
+    const chatId =
+      chatMap.get(savedActivity?.process?.id) || project?.groupNumber; // chatId padrão
     this.sendTelegramMessage(message, chatId);
 
     return savedActivity;
@@ -466,7 +470,12 @@ export class ActivitiesService {
 **Tarefa Macro:** ${activity?.macroTask?.name || 'N/A'}
 **Processo:**  ${activity?.process?.name || 'N/A'}
 **Atividade:**  ${activity.description}
-**Equipe:** ${collaborators?.map((collaborator) => collaborator?.name).filter(Boolean).join(', ') || 'N/A'}
+**Equipe:** ${
+      collaborators
+        ?.map((collaborator) => collaborator?.name)
+        .filter(Boolean)
+        .join(', ') || 'N/A'
+    }
 **Data Criação:** ${dayjs(activity.createdAt).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm')}
 **Tempo Previsto:** ${activity.estimatedTime}
 **Obs:** ${activity.observation || 'N/A'}

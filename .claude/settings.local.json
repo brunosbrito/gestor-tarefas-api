@@ -7,7 +7,10 @@
       "Read(/C:\\Users\\Yasmin\\Desktop\\dev\\gestor-tarefas-api\\src/**)",
       "Read(/C:\\Users\\Yasmin\\Desktop\\dev\\gestor-tarefas-api\\src\\modules\\activities/**)",
       "Read(/C:\\Users\\Yasmin\\Desktop\\dev\\gestor-tarefas-api\\src\\modules\\activities\\entities/**)",
-      "Read(/C:\\Users\\Yasmin\\Desktop\\dev\\gestor-tarefas-api\\src\\modules\\auth/**)"
+      "Read(/C:\\Users\\Yasmin\\Desktop\\dev\\gestor-tarefas-api\\src\\modules\\auth/**)",
+      "Bash(npm run lint:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

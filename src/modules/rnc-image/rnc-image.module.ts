@@ -13,11 +13,11 @@ import { editFileName } from 'src/util/util-file';
 @Module({
   imports: [
     MulterModule.register({
-          storage: diskStorage({
-            destination: UPLOAD_PATH,
-            filename: editFileName,
-          }),
-        }),
+      storage: diskStorage({
+        destination: UPLOAD_PATH,
+        filename: editFileName,
+      }),
+    }),
     TypeOrmModule.forFeature([RncImage, NonConformity]),
     forwardRef(() => NonConformityModule),
   ],

@@ -21,10 +21,13 @@ export class ExternalJwtAuthGuard implements CanActivate {
     const token = authHeader.replace('Bearer ', '');
 
     try {
-      const validationResult = await this.authClientService.validateToken(token);
-      
+      const validationResult =
+        await this.authClientService.validateToken(token);
+
       if (!validationResult.valid) {
-        throw new UnauthorizedException(validationResult.error || 'Invalid token');
+        throw new UnauthorizedException(
+          validationResult.error || 'Invalid token',
+        );
       }
 
       // Adiciona as informações do usuário ao request

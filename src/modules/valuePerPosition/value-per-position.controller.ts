@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Param, Delete, Patch, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Patch,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ValuePerPositionService } from './value-per-position.service';
 import { CreateValuePerPositionDto } from './dto/create-value-per-position.dto';
 import { UpdateValuePerPositionDto } from './dto/update-value-per-position.dto';
@@ -23,7 +32,10 @@ export class ValuePerPositionController {
   }
 
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateValuePerPositionDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateValuePerPositionDto,
+  ) {
     return this.service.update(id, dto);
   }
 
