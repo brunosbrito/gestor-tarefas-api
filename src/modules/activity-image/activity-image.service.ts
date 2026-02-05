@@ -58,14 +58,17 @@ export class ActivityImageService {
 
     const chatId =
       chatMap.get(savedImageWithActivity.process.id) ||
-      savedImageWithActivity.project.groupNumber;
+      String(savedImageWithActivity.project.groupNumber);
 
-    await this.sendTelegramMessageWithImage(
+    // Enviar para o Telegram em background (não bloqueia o salvamento)
+    this.sendTelegramMessageWithImage(
       message,
       chatId,
       imageUrl,
       senderName,
-    );
+    ).catch((err) => {
+      console.error('Erro ao enviar para Telegram (não bloqueante):', err.message);
+    });
 
     return savedImage;
   }

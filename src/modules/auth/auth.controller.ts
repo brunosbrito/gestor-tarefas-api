@@ -1,5 +1,11 @@
 // src/modules/auth/auth.controller.ts
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
@@ -38,5 +44,32 @@ export class AuthController {
     }
     const tokens = await this.authService.login(user);
     return tokens;
+  }
+
+  @Post('refresh')
+  async refresh(@Body() body: { refresh_token: string }) {
+    const { refresh_token } = body;
+
+    if (!refresh_token) {
+      throw new UnauthorizedException('Refresh token não fornecido');
+    }
+
+    try {
+      const result = await this.authService.refreshAccessToken(refresh_token);
+      return result;
+    } catch (error) {
+      throw new UnauthorizedException(error.message || 'Falha ao renovar token');
+    }
+  }
+
+  @Post('logout')
+  async logout(@Body() body: { refresh_token: string }) {
+    const { refresh_token } = body;
+
+    if (refresh_token) {
+      await this.authService.revokeRefreshToken(refresh_token);
+    }
+
+    return { message: 'Logout realizado com sucesso' };
   }
 }
