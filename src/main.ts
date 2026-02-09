@@ -24,7 +24,7 @@ async function bootstrap() {
     maxAge: 3600,
   });
 
-  await app.listen(process.env.PORT ?? 3002, '0.0.0.0');
+  await app.listen(3010, '0.0.0.0');
 }
 
 bootstrap();

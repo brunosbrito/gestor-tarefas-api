@@ -33,7 +33,7 @@ services:
     build:
       context: .
     ports:
-      - '127.0.0.1:3010:3000'
+      - '127.0.0.1:3010:3010'
     environment:
       DB_HOST: database
       DB_PORT: 5432

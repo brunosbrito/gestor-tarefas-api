@@ -10,5 +10,5 @@ COPY . .
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 RUN npm run build
 
-EXPOSE 3000
+EXPOSE 3010
 CMD ["node", "dist/main.js"]
