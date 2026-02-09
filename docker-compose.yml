@@ -32,7 +32,6 @@ services:
     restart: unless-stopped
     build:
       context: .
-    working_dir: /app
     volumes:
       - .:/app
     ports:

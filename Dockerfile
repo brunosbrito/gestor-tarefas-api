@@ -11,4 +11,4 @@ ENV NODE_OPTIONS="--max-old-space-size=2048"
 RUN npm run build
 
 EXPOSE 3000
-CMD ["node", "dist/main"]
+CMD ["node", "dist/main.js"]
