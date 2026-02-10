@@ -19,7 +19,12 @@ export const imageFileFilter = (
   file: Express.Multer.File,
   callback: any,
 ) => {
-  if (!file?.mimetype?.startsWith('image/')) {
+  // Verifica pelo mimetype ou pela extensão do arquivo (fallback para dispositivos móveis)
+  const allowedExtensions = /\.(jpg|jpeg|png|gif|webp|heic|heif)$/i;
+  const isImageMime = file?.mimetype?.startsWith('image/');
+  const isImageExt = allowedExtensions.test(file?.originalname || '');
+
+  if (!isImageMime && !isImageExt) {
     return callback(new Error('Only image files are allowed!'), false);
   }
 

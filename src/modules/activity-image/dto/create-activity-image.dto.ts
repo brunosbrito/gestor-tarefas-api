@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsString, IsInt, IsNumber } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsInt,
+  IsNumber,
+  IsOptional,
+} from 'class-validator';
 
 export class CreateActivityImageDto {
   @IsNumber()
@@ -13,8 +19,8 @@ export class CreateActivityImageDto {
   imagePath: string;
 
   @IsString()
-  @IsNotEmpty()
-  description: string;
+  @IsOptional()
+  description?: string;
 
   @IsInt()
   @IsNotEmpty()

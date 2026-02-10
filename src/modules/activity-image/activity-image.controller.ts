@@ -5,6 +5,7 @@ import {
   Param,
   Body,
   UseInterceptors,
+  BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ActivityImageService } from './activity-image.service';
@@ -29,6 +30,10 @@ export class ActivityImageController {
     @UploadedFile() file: Express.Multer.File,
     @Body() createActivityImageDto: CreateActivityImageDto,
   ) {
+    if (!file) {
+      throw new BadRequestException('Arquivo de imagem é obrigatório');
+    }
+
     const filePath = `/files/${file.filename}`;
 
     const newDto: CreateActivityImageDto = {
