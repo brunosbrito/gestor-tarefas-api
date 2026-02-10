@@ -6,13 +6,14 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Digitalsegurogml2024!
-      POSTGRES_DB: gestor_tarefas
+      POSTGRES_DB: db
     volumes:
       - gestor_pgdata:/var/lib/postgresql/data
     ports:
       - '0.0.0.0:5433:5432'
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres -d gestor_tarefas']
+      test:
+        ['CMD-SHELL', 'pg_isready -U postgres -d db || pg_isready -U postgres']
       interval: 10s
       timeout: 5s
       retries: 10
@@ -46,7 +47,7 @@ services:
       DB_PORT: 5432
       DB_USERNAME: postgres
       DB_PASSWORD: Digitalsegurogml2024!
-      DB_DATABASE: gestor_tarefas
+      DB_DATABASE: db
 
       # ✅ Principal: evita OOM (ajuste se precisar)
       NODE_OPTIONS: '--max-old-space-size=256'
