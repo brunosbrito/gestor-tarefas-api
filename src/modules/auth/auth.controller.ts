@@ -38,10 +38,14 @@ export class AuthController {
   async login(@Body() userData: { email: string; password: string }) {
     const { email, password } = userData;
 
+    console.log('[AUTH] Login attempt:', { email, passwordLength: password?.length });
+
     const user = await this.authService.validateUser(email, password);
     if (!user) {
+      console.log('[AUTH] Login failed: user not found or password mismatch');
       return { message: 'Credenciais inválidas' };
     }
+    console.log('[AUTH] Login success for user:', { id: user.id, email: user.email });
     const tokens = await this.authService.login(user);
     return tokens;
   }

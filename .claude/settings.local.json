@@ -10,7 +10,9 @@
       "Read(/C:\\Users\\Yasmin\\Desktop\\dev\\gestor-tarefas-api\\src\\modules\\auth/**)",
       "Bash(npm run lint:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(node -e:*)",
+      "Bash(nslookup:*)"
     ],
     "deny": [],
     "ask": []

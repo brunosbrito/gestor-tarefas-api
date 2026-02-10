@@ -27,19 +27,32 @@ import { AuthClientModule } from './modules/auth-client/auth-client.module';
       serveRoot: '/files/', // Prefixo para acessar as imagens
     }),
     ConfigModule.forRoot({
-      envFilePath: '../.env', // Caminho do arquivo .env no container, ajuste conforme necessário
       isGlobal: true,
     }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST || 'localhost',
-      port: Number(process.env.DB_PORT) || 5432,
-      database: process.env.DB_DATABASE || 'gestor_tarefas',
-      username: process.env.DB_USERNAME || 'postgres',
-      password: process.env.DB_PASSWORD || 'Digitalsegurogml2024!',
-      synchronize: true, // Mantenha como true apenas em desenvolvimento
-      entities: ['dist/**/*.entity.js'],
-      migrations: ['src/migrations/*.ts'],
+    TypeOrmModule.forRootAsync({
+      useFactory: () => {
+        const config = {
+          type: 'postgres' as const,
+          host: process.env.DB_HOST || 'localhost',
+          port: Number(process.env.DB_PORT) || 5432,
+          database: process.env.DB_DATABASE || 'gestor_tarefas',
+          username: process.env.DB_USERNAME || 'postgres',
+          password: process.env.DB_PASSWORD || 'Digitalsegurogml2024!',
+          synchronize: true,
+          entities: ['dist/**/*.entity.js'],
+          migrations: ['src/migrations/*.ts'],
+          retryAttempts: 3,
+          retryDelay: 3000,
+          logging: ['error', 'warn'] as ('error' | 'warn')[],
+        };
+        console.log('[DB CONFIG] Connecting to database:', {
+          host: config.host,
+          port: config.port,
+          database: config.database,
+          username: config.username,
+        });
+        return config;
+      },
     }),
     AuthModule,
     UserModule,
