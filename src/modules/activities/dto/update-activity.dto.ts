@@ -16,13 +16,17 @@ import { Process } from 'src/modules/processes/entities/process.entity';
 import { MacroTask } from 'src/modules/macro-task/entities/macro-task.entity';
 
 export class UpdateActivityDto extends PartialType(CreateActivityDto) {
-  @IsEnum(['Planejadas', 'Em execução', 'Concluídas', 'Paralizadas'])
+  @IsEnum(['Planejadas', 'Em execução', 'Concluídas', 'Paralizadas', 'Atrasadas'])
   @IsOptional()
   status?: string;
 
   @IsString()
   @IsOptional()
   description?: string;
+
+  @IsDateString()
+  @IsOptional()
+  plannedStartDate?: Date;
 
   @IsDateString()
   @IsOptional()
@@ -67,9 +71,9 @@ export class UpdateActivityDto extends PartialType(CreateActivityDto) {
   @IsOptional()
   reason?: string;
 
-  @IsInt()
-  @IsPositive()
-  completedQuantity: number;
+  @IsNumber()
+  @IsOptional()
+  completedQuantity?: number;
 
   @IsString()
   @IsOptional()

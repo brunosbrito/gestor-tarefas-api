@@ -18,7 +18,7 @@ export class CreateActivityDto {
   @IsNotEmpty()
   description: string;
 
-  @IsEnum(['Planejadas', 'Em execução', 'Concluídas', 'Paralizadas'])
+  @IsEnum(['Planejadas', 'Em execução', 'Concluídas', 'Paralizadas', 'Atrasadas'])
   @IsNotEmpty()
   status: string;
 
@@ -41,6 +41,10 @@ export class CreateActivityDto {
   @IsArray()
   @ArrayMinSize(1)
   collaborators: number[];
+
+  @IsDateString()
+  @IsOptional()
+  plannedStartDate?: Date;
 
   @IsDateString()
   @IsNotEmpty()

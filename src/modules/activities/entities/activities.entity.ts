@@ -30,7 +30,7 @@ export class Activity {
 
   @Column({
     type: 'enum',
-    enum: ['Planejadas', 'Em execução', 'Concluídas', 'Paralizadas'],
+    enum: ['Planejadas', 'Em execução', 'Concluídas', 'Paralizadas', 'Atrasadas'],
     default: 'Planejadas',
   })
   status: string;
@@ -97,6 +97,9 @@ export class Activity {
     cascade: true,
   })
   images: ActivityImage[];
+
+  @Column({ type: 'timestamp', nullable: true })
+  plannedStartDate: Date; // Data prevista para início.
 
   @Column({ type: 'timestamp', nullable: true })
   startDate: Date; // Data e hora de início.

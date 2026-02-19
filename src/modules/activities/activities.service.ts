@@ -240,6 +240,10 @@ export class ActivitiesService {
       activity.estimatedTime = updateActivityDto.estimatedTime;
     if (updateActivityDto.quantity)
       activity.quantity = updateActivityDto.quantity;
+    if (updateActivityDto.plannedStartDate)
+      activity.plannedStartDate = updateActivityDto.plannedStartDate;
+    if (updateActivityDto.completedQuantity !== undefined)
+      activity.completedQuantity = updateActivityDto.completedQuantity;
     // Atualizar colaboradores, se necessário
     if (updateActivityDto.collaborators) {
       activity.collaborators = await this.getCollaborators(
