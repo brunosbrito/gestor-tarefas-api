@@ -32,5 +32,6 @@ import { MacroTask } from '../macro-task/entities/macro-task.entity';
   ],
   controllers: [ActivitiesController],
   providers: [ActivitiesService],
+  exports: [ActivitiesService],
 })
 export class ActivitiesModule {}

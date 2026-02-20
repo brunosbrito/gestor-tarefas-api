@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository, In, LessThan } from 'typeorm';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 import { Activity } from './entities/activities.entity';
@@ -24,6 +24,8 @@ dayjs.extend(timezone);
 
 @Injectable()
 export class ActivitiesService {
+  private readonly logger = new Logger(ActivitiesService.name);
+
   constructor(
     @InjectRepository(Activity)
     private readonly activityRepository: Repository<Activity>,
@@ -591,4 +593,31 @@ export class ActivitiesService {
     const progress = (activity.completedQuantity / activity.quantity) * 100;
     return Math.min(Math.max(progress, 0), 100);
   };
+
+  /**
+   * Atualiza atividades que estão atrasadas:
+   * - Atividades com status "Planejadas" e plannedStartDate no passado
+   * Este método é chamado pelo cron job para atualização automática de status
+   */
+  async updateDelayedActivitiesStatus(): Promise<number> {
+    const now = new Date();
+
+    // Buscar e atualizar atividades com status "Planejadas"
+    // cujo plannedStartDate já passou
+    const result = await this.activityRepository.update(
+      {
+        status: 'Planejadas',
+        plannedStartDate: LessThan(now),
+      },
+      { status: 'Atrasadas' },
+    );
+
+    const affected = result.affected || 0;
+
+    if (affected > 0) {
+      this.logger.log(`Atualizadas ${affected} atividades para status "Atrasadas"`);
+    }
+
+    return affected;
+  }
 }

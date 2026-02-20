@@ -1,5 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { ProjectModule } from './modules/work/project.module';
@@ -19,9 +20,11 @@ import { AppController } from './app.controller';
 import { NonConformityModule } from './modules/non-conformity/non-conformity.module';
 import { ValuePerPositionModule } from './modules/valuePerPosition/value-per-position.module';
 import { AuthClientModule } from './modules/auth-client/auth-client.module';
+import { TasksModule } from './modules/tasks/tasks.module';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'files'), // Caminho para a pasta onde as imagens estão localizadas
       serveRoot: '/files/', // Prefixo para acessar as imagens
@@ -69,6 +72,7 @@ import { AuthClientModule } from './modules/auth-client/auth-client.module';
     NonConformityModule,
     ValuePerPositionModule,
     AuthClientModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [],

@@ -30,7 +30,7 @@ export class Activity {
 
   @Column({
     type: 'enum',
-    enum: ['Planejadas', 'Em execução', 'Concluídas', 'Paralizadas'],
+    enum: ['Planejadas', 'Em execução', 'Concluídas', 'Paralizadas', 'Atrasadas'],
     default: 'Planejadas',
   })
   status: string;
@@ -99,7 +99,10 @@ export class Activity {
   images: ActivityImage[];
 
   @Column({ type: 'timestamp', nullable: true })
-  startDate: Date; // Data e hora de início.
+  plannedStartDate: Date; // Data prevista de início
+
+  @Column({ type: 'timestamp', nullable: true })
+  startDate: Date; // Data e hora de início real
 
   @Column({ type: 'timestamp', nullable: true })
   endDate?: Date;
