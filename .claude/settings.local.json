@@ -16,7 +16,9 @@
       "Bash(npm install:*)",
       "Bash(npm ls:*)",
       "Bash(findstr:*)",
-      "Bash(npm:*)"
+      "Bash(npm:*)",
+      "Bash(dir node_modulesclass-transformer)",
+      "Bash(node gerar-hash.js:*)"
     ],
     "deny": [],
     "ask": []

@@ -21,6 +21,17 @@ import { NonConformityModule } from './modules/non-conformity/non-conformity.mod
 import { ValuePerPositionModule } from './modules/valuePerPosition/value-per-position.module';
 import { AuthClientModule } from './modules/auth-client/auth-client.module';
 import { TasksModule } from './modules/tasks/tasks.module';
+import { OrcamentosModule } from './modules/orcamentos/orcamentos.module';
+import { InsumosModule } from './modules/insumos/insumos.module';
+import { MateriaisCatalogoModule } from './modules/materiais-catalogo/materiais-catalogo.module';
+import { TintasModule } from './modules/tintas/tintas.module';
+import { ConsumiveisModule } from './modules/consumiveis/consumiveis.module';
+import { CargosModule } from './modules/cargos/cargos.module';
+import { FerramentasModule } from './modules/ferramentas/ferramentas.module';
+import { FornecedoresModule } from './modules/fornecedores/fornecedores.module';
+import { EpisModule } from './modules/epis/epis.module';
+import { MobilizacaoModule } from './modules/mobilizacao/mobilizacao.module';
+import { PropostasModule } from './modules/propostas/propostas.module';
 
 @Module({
   imports: [
@@ -38,7 +49,7 @@ import { TasksModule } from './modules/tasks/tasks.module';
           type: 'postgres' as const,
           host: process.env.DB_HOST || 'localhost',
           port: Number(process.env.DB_PORT) || 5432,
-          database: process.env.DB_DATABASE || 'gestor_tarefas',
+          database: process.env.DB_DATABASE || 'db',
           username: process.env.DB_USERNAME || 'postgres',
           password: process.env.DB_PASSWORD || 'Digitalsegurogml2024!',
           synchronize: true,
@@ -73,6 +84,17 @@ import { TasksModule } from './modules/tasks/tasks.module';
     ValuePerPositionModule,
     AuthClientModule,
     TasksModule,
+    OrcamentosModule,
+    InsumosModule,
+    MateriaisCatalogoModule,
+    TintasModule,
+    ConsumiveisModule,
+    CargosModule,
+    FerramentasModule,
+    FornecedoresModule,
+    EpisModule,
+    MobilizacaoModule,
+    PropostasModule,
   ],
   controllers: [AppController],
   providers: [],
