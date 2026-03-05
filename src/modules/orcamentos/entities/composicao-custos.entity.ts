@@ -16,6 +16,7 @@ export type ComposicaoTipo =
   | 'mo_montagem'
   | 'mo_terceirizados'
   | 'jato_pintura'
+  | 'tintas'
   | 'ferramentas'
   | 'ferramentas_eletricas'
   | 'consumiveis'
@@ -43,6 +44,7 @@ export class ComposicaoCustos {
       'mo_montagem',
       'mo_terceirizados',
       'jato_pintura',
+      'tintas',
       'ferramentas',
       'ferramentas_eletricas',
       'consumiveis',

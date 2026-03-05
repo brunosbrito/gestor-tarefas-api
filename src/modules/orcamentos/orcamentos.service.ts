@@ -17,16 +17,16 @@ const COMPOSICOES_PADRAO: Array<{
   bdiPercentual: number;
   ordem: number;
 }> = [
-  { tipo: 'mobilizacao', nome: 'Mobilização', bdiPercentual: 10, ordem: 1 },
-  { tipo: 'desmobilizacao', nome: 'Desmobilização', bdiPercentual: 10, ordem: 2 },
-  { tipo: 'mo_fabricacao', nome: 'MO Fabricação', bdiPercentual: 25, ordem: 3 },
-  { tipo: 'mo_montagem', nome: 'MO Montagem', bdiPercentual: 25, ordem: 4 },
-  { tipo: 'mo_terceirizados', nome: 'MO Terceirizada', bdiPercentual: 20, ordem: 5 },
-  { tipo: 'jato_pintura', nome: 'Jato/Pintura', bdiPercentual: 12, ordem: 6 },
-  { tipo: 'ferramentas', nome: 'Ferramentas Manuais', bdiPercentual: 15, ordem: 7 },
-  { tipo: 'ferramentas_eletricas', nome: 'Ferramentas Elétricas', bdiPercentual: 15, ordem: 8 },
-  { tipo: 'consumiveis', nome: 'Consumíveis', bdiPercentual: 10, ordem: 9 },
-  { tipo: 'materiais', nome: 'Materiais', bdiPercentual: 25, ordem: 10 },
+  { tipo: 'mobilizacao', nome: 'Mobilização', bdiPercentual: 0, ordem: 1 },
+  { tipo: 'desmobilizacao', nome: 'Desmobilização', bdiPercentual: 0, ordem: 2 },
+  { tipo: 'mo_fabricacao', nome: 'MO Fabricação', bdiPercentual: 0, ordem: 3 },
+  { tipo: 'mo_montagem', nome: 'MO Montagem', bdiPercentual: 0, ordem: 4 },
+  { tipo: 'mo_terceirizados', nome: 'MO Terceirizada', bdiPercentual: 0, ordem: 5 },
+  { tipo: 'jato_pintura', nome: 'Jato/Pintura', bdiPercentual: 0, ordem: 6 },
+  { tipo: 'ferramentas', nome: 'Ferramentas Manuais', bdiPercentual: 0, ordem: 7 },
+  { tipo: 'ferramentas_eletricas', nome: 'Ferramentas Elétricas', bdiPercentual: 0, ordem: 8 },
+  { tipo: 'consumiveis', nome: 'Consumíveis', bdiPercentual: 0, ordem: 9 },
+  { tipo: 'materiais', nome: 'Materiais', bdiPercentual: 0, ordem: 10 },
 ];
 
 @Injectable()
@@ -93,6 +93,7 @@ export class OrcamentosService {
       },
       configuracoes: {
         bdi: 0,
+        lucro: 0,
         encargos: 58.724,
       },
     });
@@ -183,75 +184,133 @@ export class OrcamentosService {
     // Se houver composições no DTO, processar atualizações
     if (composicoesDto && composicoesDto.length > 0) {
       for (const compDto of composicoesDto) {
-        if (compDto.id) {
+        // Tentar encontrar composição existente pelo ID
+        const composicao = compDto.id
+          ? orcamento.composicoes.find((c) => c.id === compDto.id)
+          : null;
+
+        if (composicao) {
           // Atualizar composição existente
-          const composicao = orcamento.composicoes.find((c) => c.id === compDto.id);
-          if (composicao) {
-            // Atualizar campos da composição
-            if (compDto.bdi) {
-              composicao.bdi = {
-                percentual: compDto.bdi.percentual,
-                valor: compDto.bdi.valor || 0,
-              };
-            }
-            if (compDto.ordem !== undefined) {
-              composicao.ordem = compDto.ordem;
-            }
-
-            // Processar itens
-            if (compDto.itens) {
-              // Itens existentes que devem ser mantidos
-              const idsItensDto = compDto.itens
-                .filter((i) => i.id)
-                .map((i) => i.id);
-
-              // Remover itens que não estão mais no DTO
-              const itensParaRemover = composicao.itens.filter(
-                (item) => !idsItensDto.includes(item.id),
-              );
-              if (itensParaRemover.length > 0) {
-                await this.itemRepository.remove(itensParaRemover);
-              }
-
-              // Atualizar ou criar itens
-              for (const itemDto of compDto.itens) {
-                if (itemDto.id) {
-                  // Atualizar item existente
-                  const item = composicao.itens.find((i) => i.id === itemDto.id);
-                  if (item) {
-                    Object.assign(item, {
-                      ...itemDto,
-                      subtotal: Number(itemDto.quantidade) * Number(itemDto.valorUnitario),
-                    });
-                    await this.itemRepository.save(item);
-                  }
-                } else {
-                  // Criar novo item
-                  const novoItem = this.itemRepository.create({
-                    codigo: itemDto.codigo,
-                    descricao: itemDto.descricao,
-                    quantidade: itemDto.quantidade,
-                    unidade: itemDto.unidade,
-                    peso: itemDto.peso,
-                    material: itemDto.material,
-                    especificacao: itemDto.especificacao,
-                    valorUnitario: itemDto.valorUnitario,
-                    tipoItem: itemDto.tipoItem as TipoItem || 'outros',
-                    tipoCalculo: itemDto.tipoCalculo,
-                    cargo: itemDto.cargo,
-                    encargos: itemDto.encargos,
-                    classeABC: itemDto.classeABC as ClasseABC,
-                    ordem: itemDto.ordem || 0,
-                    composicaoId: composicao.id,
-                    subtotal: Number(itemDto.quantidade) * Number(itemDto.valorUnitario),
-                  });
-                  await this.itemRepository.save(novoItem);
-                }
-              }
-            }
-
-            await this.composicaoRepository.save(composicao);
+          if (compDto.bdi) {
+            composicao.bdi = {
+              percentual: compDto.bdi.percentual,
+              valor: compDto.bdi.valor || 0,
+            };
           }
+          if (compDto.ordem !== undefined) {
+            composicao.ordem = compDto.ordem;
+          }
+
+          // Processar itens
+          if (compDto.itens) {
+            // IDs reais do DTO (existem no banco)
+            const idsReaisNoDto = compDto.itens
+              .filter((i) => i.id && composicao.itens.some((existing) => existing.id === i.id))
+              .map((i) => i.id);
+
+            // Remover itens que existem no banco mas não estão no DTO
+            const idsParaRemover = composicao.itens
+              .filter((item) => !idsReaisNoDto.includes(item.id))
+              .map((item) => item.id);
+            if (idsParaRemover.length > 0) {
+              await this.itemRepository.delete(idsParaRemover);
+              // Remover da memória também para evitar cascade re-inserir
+              composicao.itens = composicao.itens.filter(
+                (item) => !idsParaRemover.includes(item.id),
+              );
+            }
+
+            // Atualizar ou criar itens
+            for (const itemDto of compDto.itens) {
+              const itemExistente = itemDto.id
+                ? composicao.itens.find((i) => i.id === itemDto.id)
+                : null;
+
+              // Campos permitidos para atualização (sem sobrescrever relações)
+              const camposItem = {
+                codigo: itemDto.codigo,
+                descricao: itemDto.descricao,
+                quantidade: itemDto.quantidade,
+                unidade: itemDto.unidade,
+                peso: itemDto.peso,
+                material: itemDto.material,
+                especificacao: itemDto.especificacao,
+                valorUnitario: itemDto.valorUnitario,
+                tipoItem: (itemDto.tipoItem as TipoItem) || 'outros',
+                tipoCalculo: itemDto.tipoCalculo,
+                cargo: itemDto.cargo,
+                encargos: itemDto.encargos,
+                classeABC: itemDto.classeABC as ClasseABC,
+                ordem: itemDto.ordem || 0,
+                subtotal:
+                  Number(itemDto.quantidade) * Number(itemDto.valorUnitario),
+              };
+
+              if (itemExistente) {
+                // Atualizar item existente (sem tocar em composicaoId/composicao)
+                Object.assign(itemExistente, camposItem);
+                await this.itemRepository.save(itemExistente);
+              } else {
+                // Criar novo item (ID ausente ou não encontrado)
+                const novoItem = this.itemRepository.create({
+                  ...camposItem,
+                  composicaoId: composicao.id,
+                });
+                const saved = await this.itemRepository.save(novoItem);
+                // Adicionar à memória para manter sincronizado
+                composicao.itens.push(saved);
+              }
+            }
+          }
+
+          // Salvar composição SEM cascade nos itens (já foram salvos individualmente)
+          await this.composicaoRepository
+            .createQueryBuilder()
+            .update(ComposicaoCustos)
+            .set({
+              bdi: composicao.bdi,
+              ordem: composicao.ordem,
+            })
+            .where('id = :id', { id: composicao.id })
+            .execute();
+        } else if (compDto.tipo) {
+          // Criar nova composição (ex: tintas, quando não existia antes)
+          const novaComposicao = this.composicaoRepository.create({
+            nome: compDto.nome || compDto.tipo,
+            tipo: compDto.tipo as ComposicaoTipo,
+            bdi: compDto.bdi || { percentual: 0, valor: 0 },
+            ordem: compDto.ordem || orcamento.composicoes.length + 1,
+            orcamentoId: orcamento.id,
+          });
+
+          const savedComposicao = await this.composicaoRepository.save(novaComposicao);
+
+          // Criar itens da nova composição
+          if (compDto.itens && compDto.itens.length > 0) {
+            for (const itemDto of compDto.itens) {
+              const novoItem = this.itemRepository.create({
+                codigo: itemDto.codigo,
+                descricao: itemDto.descricao,
+                quantidade: itemDto.quantidade,
+                unidade: itemDto.unidade,
+                peso: itemDto.peso,
+                material: itemDto.material,
+                especificacao: itemDto.especificacao,
+                valorUnitario: itemDto.valorUnitario,
+                tipoItem: itemDto.tipoItem as TipoItem || 'outros',
+                tipoCalculo: itemDto.tipoCalculo,
+                cargo: itemDto.cargo,
+                encargos: itemDto.encargos,
+                classeABC: itemDto.classeABC as ClasseABC,
+                ordem: itemDto.ordem || 0,
+                subtotal: Number(itemDto.quantidade) * Number(itemDto.valorUnitario),
+                composicaoId: savedComposicao.id,
+              });
+              await this.itemRepository.save(novoItem);
+            }
+          }
+
+          orcamento.composicoes.push(savedComposicao);
         }
       }
     }
@@ -408,12 +467,21 @@ export class OrcamentosService {
     orcamento.bdiMedio =
       custoDirectoTotal > 0 ? (bdiTotal / custoDirectoTotal) * 100 : 0;
 
-    // Calcular tributos
+    // Lucro (separado do BDI, aplicado sobre subtotal)
+    const lucroConfig = orcamento.configuracoesDetalhadas?.lucro;
+    const lucroPercentual = lucroConfig?.habilitado && lucroConfig.percentual > 0
+      ? lucroConfig.percentual
+      : 0;
+    const lucroTotal = orcamento.subtotal * (lucroPercentual / 100);
+    orcamento.lucroTotal = lucroTotal;
+    orcamento.precoBase = orcamento.subtotal + lucroTotal;
+
+    // Calcular tributos (sobre preço base)
     const aliquotaSimples = orcamento.tributos?.aliquotaSimples || 0;
-    orcamento.tributosTotal = orcamento.subtotal * (aliquotaSimples / 100);
+    orcamento.tributosTotal = orcamento.precoBase * (aliquotaSimples / 100);
 
     // Total de venda
-    orcamento.totalVenda = orcamento.subtotal + orcamento.tributosTotal;
+    orcamento.totalVenda = orcamento.precoBase + orcamento.tributosTotal;
 
     // Custo por m²
     if (orcamento.areaTotalM2 && Number(orcamento.areaTotalM2) > 0) {
@@ -421,21 +489,14 @@ export class OrcamentosService {
     }
 
     // DRE
-    const receitaLiquida = orcamento.subtotal * (1 - aliquotaSimples / 100);
+    const receitaLiquida = orcamento.totalVenda - orcamento.tributosTotal; // = precoBase
     const lucroBruto = receitaLiquida - custoDirectoTotal;
     const margemBruta = receitaLiquida > 0 ? (lucroBruto / receitaLiquida) * 100 : 0;
-
-    // Lucro líquido baseado no BDI detalhado (se configurado)
-    let lucroLiquido = 0;
-    let margemLiquida = 0;
-    const lucroConfig = orcamento.configuracoesDetalhadas?.bdi?.lucro;
-    if (lucroConfig?.habilitado && lucroConfig.percentual > 0) {
-      lucroLiquido = custoDirectoTotal * (lucroConfig.percentual / 100);
-      margemLiquida =
-        orcamento.totalVenda > 0
-          ? (lucroLiquido / orcamento.totalVenda) * 100
-          : 0;
-    }
+    const lucroLiquido = lucroTotal;
+    const margemLiquida =
+      orcamento.totalVenda > 0
+        ? (lucroLiquido / orcamento.totalVenda) * 100
+        : 0;
 
     orcamento.dre = {
       receitaLiquida,
@@ -460,6 +521,7 @@ export class OrcamentosService {
           qqpSuprimentos.materiais += Number(comp.subtotal);
           break;
         case 'jato_pintura':
+        case 'tintas':
           qqpSuprimentos.pintura += Number(comp.subtotal);
           break;
         case 'ferramentas':
@@ -731,6 +793,7 @@ export class OrcamentosService {
       },
       configuracoes: {
         bdi: 0,
+        lucro: 0,
         encargos: 58.724,
       },
       createdBy: 1,
@@ -839,18 +902,16 @@ export class OrcamentosService {
     const margemBruta =
       somaReceitaLiquida > 0 ? (somaBdiTotal / somaReceitaLiquida) * 100 : null;
 
-    // Margem Líquida (baseada no componente Lucro do BDI detalhado)
+    // Margem Líquida (baseada no lucro separado)
     const aprovadosComLucro = aprovadosMes.filter(
-      (o) =>
-        o.configuracoesDetalhadas?.bdi?.lucro?.habilitado === true &&
-        (o.configuracoesDetalhadas?.bdi?.lucro?.percentual ?? 0) > 0
+      (o) => Number(o.lucroTotal || 0) > 0
     );
     let margemLiquida: number | null = null;
     if (aprovadosComLucro.length > 0) {
-      const somaLucro = aprovadosComLucro.reduce((sum, o) => {
-        const pct = o.configuracoesDetalhadas?.bdi?.lucro?.percentual || 0;
-        return sum + Number(o.custoDirectoTotal || 0) * (pct / 100);
-      }, 0);
+      const somaLucro = aprovadosComLucro.reduce(
+        (sum, o) => sum + Number(o.lucroTotal || 0),
+        0
+      );
       const somaTotalVenda = aprovadosComLucro.reduce(
         (sum, o) => sum + Number(o.totalVenda || 0),
         0

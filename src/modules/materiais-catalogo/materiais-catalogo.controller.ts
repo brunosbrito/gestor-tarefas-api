@@ -57,6 +57,11 @@ export class MateriaisCatalogoController {
     return this.service.seed();
   }
 
+  @Post('seed/bulk')
+  seedBulk(@Body() materiais: CreateMaterialCatalogoDto[]) {
+    return this.service.seedBulk(materiais);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.service.findOne(+id);

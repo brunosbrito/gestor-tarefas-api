@@ -7,40 +7,38 @@ import {
 } from 'typeorm';
 
 export enum MaterialCategoria {
-  // Perfis
-  PERFIL_U = 'perfil_u',
-  PERFIL_U_ENRIJECIDO = 'perfil_u_enrijecido',
-  PERFIL_L = 'perfil_l',
+  // Perfis Estruturais
   PERFIL_I = 'perfil_i',
-  PERFIL_H = 'perfil_h',
-  PERFIL_T = 'perfil_t',
-  PERFIL_Z = 'perfil_z',
-  PERFIL_CARTOLA = 'perfil_cartola',
+  PERFIL_U = 'perfil_u',
+  CANTONEIRA = 'cantoneira',
+  PERFIL_W = 'perfil_w',
+  PERFIL_HP = 'perfil_hp',
 
   // Barras
-  BARRA_CHATA = 'barra_chata',
   BARRA_REDONDA = 'barra_redonda',
+  BARRA_CHATA = 'barra_chata',
   BARRA_QUADRADA = 'barra_quadrada',
 
   // Tubos
-  TUBO_REDONDO = 'tubo_redondo',
   TUBO_QUADRADO = 'tubo_quadrado',
   TUBO_RETANGULAR = 'tubo_retangular',
+  TUBO_REDONDO = 'tubo_redondo',
 
   // Chapas
-  CHAPA_FINA = 'chapa_fina',
-  CHAPA_GROSSA = 'chapa_grossa',
-  CHAPA_XADREZ = 'chapa_xadrez',
+  CHAPA = 'chapa',
 
   // Telhas
   TELHA_TRAPEZOIDAL = 'telha_trapezoidal',
   TELHA_ONDULADA = 'telha_ondulada',
+  TELHA_MULTIONDA = 'telha_multionda',
 
   // Parafusos
-  PARAFUSO = 'parafuso',
-  PORCA = 'porca',
-  ARRUELA = 'arruela',
-  CHUMBADOR = 'chumbador',
+  PARAFUSO_A307 = 'parafuso_a307',
+  PARAFUSO_A325 = 'parafuso_a325',
+  PARAFUSO_A489 = 'parafuso_a489',
+
+  // Outros
+  OUTRO = 'outro',
 }
 
 @Entity('materiais_catalogo')
@@ -79,6 +77,9 @@ export class MaterialCatalogo {
   areaM2PorMetroLinear: number;
 
   @Column({ nullable: true })
+  tipoMaterialPintura: string;
+
+  @Column({ type: 'text', nullable: true })
   especificacao: string;
 
   @Column({ nullable: true })

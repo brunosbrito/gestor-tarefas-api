@@ -19,6 +19,7 @@ export interface Tributos {
 
 export interface Configuracoes {
   bdi: number;
+  lucro: number;
   encargos: number;
 }
 
@@ -28,8 +29,8 @@ export interface ConfiguracoesDetalhadas {
     seguros?: { percentual: number; habilitado: boolean };
     garantias?: { percentual: number; habilitado: boolean };
     riscos?: { percentual: number; habilitado: boolean };
-    lucro?: { percentual: number; habilitado: boolean };
   };
+  lucro?: { percentual: number; habilitado: boolean };
 }
 
 export interface QQPSuprimentos {
@@ -109,7 +110,7 @@ export class Orcamento {
 
   @Column({
     type: 'jsonb',
-    default: { bdi: 0, encargos: 58.724 },
+    default: { bdi: 0, lucro: 0, encargos: 58.724 },
   })
   configuracoes: Configuracoes;
 
@@ -140,6 +141,12 @@ export class Orcamento {
 
   @Column({ type: 'decimal', precision: 14, scale: 2, default: 0 })
   subtotal: number;
+
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0 })
+  lucroTotal: number;
+
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0 })
+  precoBase: number;
 
   @Column({ type: 'decimal', precision: 14, scale: 2, default: 0 })
   tributosTotal: number;

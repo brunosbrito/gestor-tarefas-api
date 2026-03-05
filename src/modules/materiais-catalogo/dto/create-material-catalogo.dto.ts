@@ -51,6 +51,10 @@ export class CreateMaterialCatalogoDto {
 
   @IsString()
   @IsOptional()
+  tipoMaterialPintura?: string;
+
+  @IsString()
+  @IsOptional()
   especificacao?: string;
 
   @IsString()

@@ -31,6 +31,10 @@ class ConfiguracoesDto {
 
   @IsNumber()
   @IsOptional()
+  lucro?: number;
+
+  @IsNumber()
+  @IsOptional()
   encargos?: number;
 }
 
@@ -68,12 +72,6 @@ class BDIDetalhadoDto {
   @ValidateNested()
   @Type(() => BDIComponenteDto)
   riscos?: BDIComponenteDto;
-
-  @IsObject()
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => BDIComponenteDto)
-  lucro?: BDIComponenteDto;
 }
 
 class ConfiguracoesDetalhadasDto {
@@ -82,6 +80,12 @@ class ConfiguracoesDetalhadasDto {
   @ValidateNested()
   @Type(() => BDIDetalhadoDto)
   bdi?: BDIDetalhadoDto;
+
+  @IsObject()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => BDIComponenteDto)
+  lucro?: BDIComponenteDto;
 }
 
 class EncargosDto {
@@ -179,6 +183,7 @@ class ComposicaoDto {
     'mo_montagem',
     'mo_terceirizados',
     'jato_pintura',
+    'tintas',
     'ferramentas',
     'ferramentas_eletricas',
     'consumiveis',
